@@ -1,0 +1,27 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/
+*.code-workspace
+
+# Logs & temp
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# LÖVE packaged builds
+*.love
+
+# Build outputs
+build/
+dist/
+releases/
+
+# Runtime data (keep folder via .gitkeep)
+Data/**
+!Data/.gitkeep

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sumneko/lua-language-server/master/locale/luarc.json",
+  "runtime.version": "LuaJIT",
+  "workspace.checkThirdParty": false,
+  "workspace.ignoreDir": [
+    ".git",
+    ".github",
+    "Assets",
+    "Docs",
+    "Data"
+  ],
+  "diagnostics.globals": ["love"],
+  "hint.enable": true
+}

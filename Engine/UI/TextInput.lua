@@ -1,0 +1,118 @@
+-- Engine/UI/TextInput.lua
+local Widget = require("Engine.UI.Widget")
+local Defaults = require("Engine.UI.Defaults")
+
+---
+---@class TextInput : Widget
+---@field w number
+---@field h number
+---@field text string
+---@field caret number
+---@field focused boolean
+---@field placeholder string
+---@field colors table
+local TextInput = Widget:extend()
+
+---
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@param opts table|nil
+function TextInput:init(x, y, w, h, opts)
+    opts = opts or {}
+    local tw = w or 180
+    local th = h or 28
+    Widget.init(self, x or 0, y or 0, tw, th, opts)
+    self.w = tw
+    self.h = th
+    self.text = ""
+    self.caret = 0
+    self.focused = false
+    self.placeholder = opts.placeholder or ""
+    self.colors = opts.colors or Defaults.inputColors
+end
+
+---
+---@param t string|nil
+function TextInput:setText(t)
+    self.text = tostring(t or "")
+    self.caret = #self.text
+end
+
+function TextInput:getText()
+    return self.text
+end
+
+---
+---@param mx number
+---@param my number
+---@return boolean
+function TextInput:hitTest(mx, my)
+    local x, y = self:getWorldPosition()
+    local w = self.w * (self.sx or 1)
+    local h = self.h * (self.sy or 1)
+    return mx >= x and mx <= x + w and my >= y and my <= y + h
+end
+
+---
+---@param x number
+---@param y number
+---@param button number
+function TextInput:mousepressed(x, y, button)
+    if button ~= 1 then return end
+    self.focused = self:hitTest(x, y)
+end
+
+---
+---@param key string
+function TextInput:keypressed(key)
+    if not self.focused then return end
+    if key == "backspace" then
+        if self.caret > 0 then
+            self.text = string.sub(self.text, 1, self.caret - 1) .. string.sub(self.text, self.caret + 1)
+            self.caret = math.max(0, self.caret - 1)
+        end
+    elseif key == "left" then
+        self.caret = math.max(0, self.caret - 1)
+    elseif key == "right" then
+        self.caret = math.min(#self.text, self.caret + 1)
+    end
+end
+
+---
+---@param t string
+function TextInput:textinput(t)
+    if not self.focused then return end
+    local left = string.sub(self.text, 1, self.caret)
+    local right = string.sub(self.text, self.caret + 1)
+    self.text = left .. t .. right
+    self.caret = self.caret + #t
+end
+
+---comment
+---@param x number
+---@param y number
+function TextInput:render(x, y)
+    love.graphics.setColor(self.colors.bg)
+    love.graphics.rectangle("fill", x, y, self.w, self.h)
+    love.graphics.setColor(self.colors.border)
+    love.graphics.rectangle("line", x, y, self.w, self.h)
+
+    local showPlaceholder = (self.text == "" and not self.focused and self.placeholder ~= "")
+    love.graphics.setColor(showPlaceholder and self.colors.placeholder or self.colors.text)
+    local pad = 6
+    love.graphics.print(showPlaceholder and self.placeholder or self.text, x + pad, y + (self.h - 14) / 2)
+
+    if self.focused then
+        local t = love.timer.getTime()
+        if math.floor(t * 1.2) % 2 == 0 then
+            local caretX = x + pad + love.graphics.getFont():getWidth(string.sub(self.text, 1, self.caret))
+            love.graphics.setColor(self.colors.text)
+            love.graphics.line(caretX, y + 5, caretX, y + self.h - 5)
+        end
+    end
+    love.graphics.setColor(1,1,1,1)
+end
+
+return TextInput
