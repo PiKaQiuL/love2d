@@ -12,6 +12,7 @@ local Input = require("Engine.Systems.Input")
 local MainScene = Scene:extend()
 
 function MainScene:enter()
+    if self.app and self.app.logger then self.app.logger:info("MainScene enter") end
     -- 资源系统
     self.resources = ResourceSystem()
     self.resources:addResource("gold", { amount = 0, rate = 1, display = "Gold" })
@@ -50,12 +51,14 @@ function MainScene:enter()
     -- 事件日志：键盘/鼠标
     self._h_key = self.app:on("input:keypressed", function(key)
         self.log:add("[key] " .. tostring(key))
+        if self.app and self.app.logger then self.app.logger:debugf("keypressed: %s", tostring(key)) end
     end)
     self._h_text = self.app:on("input:text", function(t)
         self.log:add("[text] " .. tostring(t))
     end)
     self._h_mpress = self.app:on("input:mousepressed", function(x, y, button)
         self.log:add(string.format("[mouse] btn%d at (%.0f,%.0f)", button, x, y))
+        if self.app and self.app.logger then self.app.logger:debugf("mousepressed: btn%d (%.0f,%.0f)", button, x, y) end
         if self.scrollList and self.scrollList.mousepressed and self.scrollList:hitTest(x, y) then
             self.scrollList:mousepressed(x, y, button)
         end
@@ -116,14 +119,21 @@ function MainScene:draw()
 end
 
 function MainScene:keypressed(key)
+    if key == "f2" then
+        if self.app and self.app.logger then self.app.logger:info("Switch to button-test scene") end
+        if self.app and self.app.switchScene then self.app:switchScene("button-test") end
+        return
+    end
     if key == "space" then
         self.log:add("Space pressed: +5 gold")
+        if self.app and self.app.logger then self.app.logger:info("Space adds 5 gold") end
         local g = self.resources:get("gold")
         if g then g.amount = g.amount + 5 end
     end
 end
 
 function MainScene:leave()
+    if self.app and self.app.logger then self.app.logger:info("MainScene leave") end
     -- 清理事件监听器
     if self._h_key then self.app:off("input:keypressed", self._h_key) end
     if self._h_text then self.app:off("input:text", self._h_text) end

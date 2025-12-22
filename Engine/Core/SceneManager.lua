@@ -42,7 +42,9 @@ end
 ---@param params table|nil
 function SceneManager:switch(name, params)
     local scene = self._registry[name]
+    local logger = self.app and self.app.logger
     if not scene then
+        if logger then logger:errorf("Scene not found: %s", tostring(name)) end
         error("Scene not found: " .. tostring(name))
     end
     -- 暂停旧场景的事件目标，避免残留监听干扰
@@ -50,11 +52,20 @@ function SceneManager:switch(name, params)
         self.app:pauseTarget(self.current)
     end
     if self.current and self.current.leave then
-        self.current:leave()
+        local ok, err = pcall(self.current.leave, self.current)
+        if not ok then
+            if logger then logger:errorf("Scene leave error (%s): %s", tostring(self.current), tostring(err)) end
+            error(err)
+        end
     end
+    if logger then logger:infof("Switch scene: %s", tostring(name)) end
     self.current = scene
     if self.current.enter then
-        self.current:enter(params)
+        local ok, err = pcall(self.current.enter, self.current, params)
+        if not ok then
+            if logger then logger:errorf("Scene enter error (%s): %s", tostring(name), tostring(err)) end
+            error(err)
+        end
     end
     -- 恢复新场景的事件目标（若其监听使用 target=self）
     if self.current and self.app and self.app.resumeTarget then

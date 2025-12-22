@@ -25,6 +25,7 @@ end
 ---@param t string|nil
 function Label:setText(t)
     self.text = tostring(t or "")
+    return self
 end
 
 ---
@@ -34,12 +35,14 @@ end
 ---@param a number|nil
 function Label:setColor(r, g, b, a)
     self.color = { r or 1, g or 1, b or 1, a or 1 }
+    return self
 end
 
 ---
 ---@param font love.Font
 function Label:setFont(font)
     self.font = font
+    return self
 end
 
 ---

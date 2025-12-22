@@ -29,6 +29,7 @@ function Node:add(child)
     child.parent = self
     self.children[#self.children + 1] = child
     if child.onEnter then child:onEnter() end
+    return self
 end
 
 function Node:remove(child)
@@ -38,14 +39,16 @@ function Node:remove(child)
             table.remove(self.children, i)
             child.parent = nil
             if child.onExit then child:onExit() end
-            return
+            return self
         end
     end
+    return self
 end
 
 function Node:setPosition(x, y)
     if x ~= nil then self.x = x end
     if y ~= nil then self.y = y end
+    return self
 end
 
 function Node:getWorldPosition()

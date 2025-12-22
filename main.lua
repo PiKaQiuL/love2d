@@ -63,6 +63,7 @@ function love.run()
     local target = 1 / TARGET_FPS
     local run_time = 0
     -- 使用 LÖVE 内置事件分发表
+---@diagnostic disable-next-line: undefined-field
     handlers = love.handlers
     return function()
         run_time = love.timer.getTime()

@@ -15,6 +15,7 @@ local Label = require("Engine.UI.Label")
 local TextInput = require("Engine.UI.TextInput")
 local ListView = require("Engine.UI.ListView")
 local Layout = require("Engine.UI.Layout")
+local ProgressBar = require("Engine.UI.ProgressBar")
 
 ---
 ---@class ThemePanel
@@ -59,6 +60,7 @@ local Layout = require("Engine.UI.Layout")
 ---@field input ThemeInput
 ---@field list ThemeList
 ---@field layout ThemeLayout
+---@field progress { bg: Color|nil, fill: Color, border: Color }
 
 ---@class Style : Object
 ---@field theme Theme
@@ -96,6 +98,11 @@ function Style:init(theme)
             bg = nil,
             border = {1,1,1,0.3},
             borderWidth = 1
+        },
+        progress = {
+            bg = {0.08,0.08,0.08,1},
+            fill = {0.6,0.8,1.0,0.9},
+            border = {1,1,1,0.3}
         }
     }
 end
@@ -170,6 +177,16 @@ function Style:applyLayout(layout)
     layout.borderWidth = self.theme.layout.borderWidth or 1
 end
 
+---@param bar ProgressBar
+function Style:applyProgressBar(bar)
+    if not bar or not bar.is or not bar:is(ProgressBar) then return end
+    bar.colors = {
+        bg = self.theme.progress.bg,
+        fill = self.theme.progress.fill,
+        border = self.theme.progress.border
+    }
+end
+
 -- 批量应用：遍历节点树，对已知控件应用主题
 ---@param root any
 ---@param fn fun(node:any)
@@ -194,6 +211,7 @@ function Style:applyTree(root)
             elseif node:is(TextInput) then t:applyTextInput(node)
             elseif node:is(ListView) then t:applyListView(node)
             elseif node:is(Layout) then t:applyLayout(node)
+            elseif node:is(ProgressBar) then t:applyProgressBar(node)
             end
         end
     end)

@@ -50,6 +50,7 @@ end
 function Button:setDisabled(d)
     self.disabled = not not d
     self.state = self.disabled and Enums.ButtonState.disabled or Enums.ButtonState.normal
+    return self
 end
 
 function Button:render(x, y)
@@ -108,6 +109,7 @@ end
 
 function Button:setFocus(f)
     self.focused = not not f
+    return self
 end
 
 function Button:keypressed(key)

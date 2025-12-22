@@ -38,6 +38,7 @@ end
 function TextInput:setText(t)
     self.text = tostring(t or "")
     self.caret = #self.text
+    return self
 end
 
 function TextInput:getText()

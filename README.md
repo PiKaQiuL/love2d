@@ -39,9 +39,15 @@ Game/
     UI/           简易文本 UI
 ```
 
+## 日志输出与运行
+
+- 日志：框架内置 `Logger` 系统，日志文件每日写入项目根目录的 `Logs/` 目录，例如 `Logs/game-YYYY-MM-DD.log`。
+- 运行：在安装了 LÖVE 的环境中，进入项目目录运行 `love .` 即可；Windows 可直接执行 `love.exe` 指向项目路径。
+
 ## 快速集成
 
 示例将这些模块与 Love2D 的主循环连接：
+- UI naming conventions: see [Docs/UI-Naming.md](Docs/UI-Naming.md).
 
 ```lua
 local App = require("Engine.App")

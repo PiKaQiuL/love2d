@@ -48,6 +48,7 @@ end
 ---@param h number
 function Panel:setSize(w, h)
     self.w, self.h = w, h
+    return self
 end
 
 ---@param x number

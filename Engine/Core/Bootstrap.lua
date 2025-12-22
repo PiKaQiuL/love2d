@@ -1,7 +1,7 @@
 -- Engine/Bootstrap.lua
 -- 引导应用与场景注册
 -- 模块：引导器
--- 功能：创建 App，接入输入系统并注册/切换到主场景
+-- 功能：创建 App，接入输入与平台系统，注册引擎默认加载场景；随后加载 Game 侧入口完成场景注册
 -- 依赖：Engine.App, Engine.Scene, Engine.Input
 -- 作者：Team
 -- 修改时间：2025-12-21
@@ -11,8 +11,11 @@
 
 local App = require("Engine.Core.App")
 local Scene = require("Engine.Core.Scene")
+local LoadingScene = require("Engine.Scenes.LoadingScene")
 local Input = require("Engine.Systems.Input")
 local Platform = require("Engine.Systems.Platform")
+local Animation = require("Engine.Systems.Animation")
+local Logger = require("Engine.Systems.Logger")
 local Config = require("Engine.Core.Config")
 
 local function loadDefaultFont()
@@ -54,11 +57,30 @@ local function boot()
     app.input = input
     -- 平台系统：检测 OS/DPI 等并广播 platform:ready
     app:addSystem(Platform())
+    -- 动画系统：补间轨道管理
+    local anim = Animation()
+    app:addSystem(anim)
+    app.animation = anim
 
-    -- 加载示例场景
-    local MainScene = require("Game.Scenes.MainScene")
-    app.scenes:register("main", MainScene(app))
-    app:switchScene("main")
+    -- 日志系统：写入项目 Logs 目录
+    local logger = Logger({ level = 2 }) -- 默认 info
+    app:addSystem(logger)
+    app.logger = logger
+
+    -- 引擎默认加载场景（Loading）
+    app.scenes:register("loading", LoadingScene(app))
+    app:switchScene("loading")
+
+    -- 下一帧延后加载 Game 入口，交由 Game 注册并切换到其主场景
+    app.timer:after(0, function()
+        local ok, gameBoot = pcall(require, "Game.Bootstrap")
+        if ok and gameBoot and type(gameBoot) == "function" then
+            gameBoot(app)
+        else
+            -- 若 Game 入口缺失，保持加载场景并给出提示
+            if app.logger then app.logger:warn("Game.Bootstrap not found or invalid; stay at loading scene.") end
+        end
+    end)
 
     return app
 end

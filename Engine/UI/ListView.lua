@@ -90,23 +90,27 @@ end
 function ListView:setScroll(y)
     local maxScroll = self:getScrollMax()
     self.scrollY = clamp(y or 0, 0, maxScroll)
+    return self
 end
 
 ---@param dy number|nil
 function ListView:scrollBy(dy)
     self:setScroll((self.scrollY or 0) + (dy or 0))
+    return self
 end
 
 ---
 ---@param item string|number
 function ListView:add(item)
     self.items[#self.items + 1] = tostring(item)
+    return self
 end
 
 function ListView:clear()
     self.items = {}
     self.selected = nil
     self.hoverIndex = nil
+    return self
 end
 
 ---

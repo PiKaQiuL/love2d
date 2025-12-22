@@ -78,6 +78,7 @@ end
 function Layout:setDirection(dir)
     self.direction = dir or self.direction
     self:relayout()
+    return self
 end
 
 --- 设置子项间距
@@ -87,6 +88,7 @@ function Layout:setSpacing(s)
     self.gapX = self.gapX or self.spacing
     self.gapY = self.gapY or self.spacing
     self:relayout()
+    return self
 end
 
 --- 设置内边距
@@ -102,6 +104,7 @@ function Layout:setPadding(p)
         self.padB = self.padding.b or 0
     end
     self:relayout()
+    return self
 end
 
 --- 设置对齐方式
@@ -109,6 +112,7 @@ end
 function Layout:setAlign(a)
     self.align = a or self.align
     self:relayout()
+    return self
 end
 
 --- 设置主轴分布
@@ -116,6 +120,7 @@ end
 function Layout:setJustify(j)
     self.justify = j or self.justify
     self:relayout()
+    return self
 end
 
 --- 设置是否换行
@@ -123,12 +128,14 @@ end
 function Layout:setWrap(wrap)
     self.wrap = not not wrap
     self:relayout()
+    return self
 end
 
 --- 设置剪裁
 ---@param clip boolean
 function Layout:setClip(clip)
     self.clip = not not clip
+    return self
 end
 
 --- 设置双轴间距
@@ -138,6 +145,7 @@ function Layout:setGaps(gx, gy)
     self.gapX = gx or self.gapX
     self.gapY = gy or self.gapY
     self:relayout()
+    return self
 end
 
 --- 设置自动尺寸
@@ -145,6 +153,7 @@ end
 function Layout:setAutoSize(v)
     self.autoSize = not not v
     self:relayout()
+    return self
 end
 
 --- 设置容器尺寸
@@ -153,6 +162,7 @@ end
 function Layout:setSize(w, h)
     self.w, self.h = w or self.w, h or self.h
     self:relayout()
+    return self
 end
 
 -- 为子节点添加并记录布局项（支持 margin）
@@ -170,11 +180,13 @@ function Layout:add(child, opts)
     end
     self._layout[child] = { margin = m }
     self:relayout()
+    return self
 end
 
 function Layout:remove(child)
     self._layout[child] = nil
-    return Node.remove(self, child)
+    Node.remove(self, child)
+    return self
 end
 
 -- 尝试测量子项尺寸

@@ -10,6 +10,7 @@
 ---@field inputColors { bg: number[], border: number[], text: number[], placeholder: number[] }
 ---@field listColors { bg: number[], border: number[], text: number[], hover: number[], selected: number[] }
 ---@field layoutColors { bg: number[]|nil, border: number[], borderWidth: integer }
+---@field progressColors { bg: number[]|nil, fill: number[], border: number[] }
 local Defaults = {}
 
 ---@type number[]
@@ -55,6 +56,13 @@ Defaults.layoutColors = {
     bg = nil,
     border = {1, 1, 1, 0.3},
     borderWidth = 1
+}
+
+---@type { bg: number[]|nil, fill: number[], border: number[] }
+Defaults.progressColors = {
+    bg = {0.08, 0.08, 0.08, 1},
+    fill = {0.6, 0.8, 1.0, 0.9},
+    border = {1, 1, 1, 0.3}
 }
 
 return Defaults
