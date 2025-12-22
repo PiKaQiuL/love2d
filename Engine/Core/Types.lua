@@ -5,6 +5,21 @@
 --- 通用颜色数组 RGBA
 ---@alias Color number[]
 
+--- 二维向量
+---@class Vec2
+---@field x number
+---@field y number
+
+--- 矩形
+---@class Rect
+---@field x number
+---@field y number
+---@field w number
+---@field h number
+
+--- 字体规格（文档类型，实际通常为 love.Font）
+---@alias FontSpec love.Font|string|{ name: string, size: number }
+
 --- 外边距/内边距对象
 ---@class Margin
 ---@field l number
@@ -52,6 +67,9 @@
 ---@field mousereleased fun(self:System, x:number, y:number, button:integer, presses:integer|nil)|nil
 ---@field mousemoved fun(self:System, x:number, y:number, dx:number, dy:number, istouch:boolean|nil)|nil
 ---@field wheelmoved fun(self:System, dx:number, dy:number)|nil
+---@field touchpressed fun(self:System, id:number, x:number, y:number, dx:number|nil, dy:number|nil, pressure:number|nil)|nil
+---@field touchmoved fun(self:System, id:number, x:number, y:number, dx:number|nil, dy:number|nil, pressure:number|nil)|nil
+---@field touchreleased fun(self:System, id:number, x:number, y:number, dx:number|nil, dy:number|nil, pressure:number|nil)|nil
 
 --- Scene 可选回调接口
 ---@class SceneCallbacks
@@ -66,6 +84,9 @@
 ---@field mousereleased fun(self:Scene, x:number, y:number, button:integer, istouch:boolean|nil, presses:integer|nil)|nil
 ---@field mousemoved fun(self:Scene, x:number, y:number, dx:number, dy:number, istouch:boolean|nil)|nil
 ---@field wheelmoved fun(self:Scene, dx:number, dy:number)|nil
+---@field touchpressed fun(self:Scene, id:number, x:number, y:number, dx:number|nil, dy:number|nil, pressure:number|nil)|nil
+---@field touchmoved fun(self:Scene, id:number, x:number, y:number, dx:number|nil, dy:number|nil, pressure:number|nil)|nil
+---@field touchreleased fun(self:Scene, id:number, x:number, y:number, dx:number|nil, dy:number|nil, pressure:number|nil)|nil
 
 local Types = {}
 return Types

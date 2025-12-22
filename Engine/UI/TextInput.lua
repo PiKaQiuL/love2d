@@ -2,23 +2,35 @@
 local Widget = require("Engine.UI.Widget")
 local Defaults = require("Engine.UI.Defaults")
 
+--- 输入框配色
+---@class TextInputColors
+---@field bg Color
+---@field border Color
+---@field text Color
+---@field placeholder Color
+
+--- 创建 TextInput 时的可选参数
+---@class TextInputOptions
+---@field placeholder string|nil
+---@field colors TextInputColors|nil
+
 ---
 ---@class TextInput : Widget
 ---@field w number
 ---@field h number
 ---@field text string
----@field caret number
+---@field caret integer
 ---@field focused boolean
 ---@field placeholder string
----@field colors table
+---@field colors TextInputColors
 local TextInput = Widget:extend()
 
 ---
----@param x number
----@param y number
----@param w number
----@param h number
----@param opts table|nil
+---@param x number|nil
+---@param y number|nil
+---@param w number|nil
+---@param h number|nil
+---@param opts TextInputOptions|nil
 function TextInput:init(x, y, w, h, opts)
     opts = opts or {}
     local tw = w or 180
@@ -35,12 +47,15 @@ end
 
 ---
 ---@param t string|nil
+---@return TextInput
 function TextInput:setText(t)
     self.text = tostring(t or "")
     self.caret = #self.text
     return self
 end
 
+---
+---@return string
 function TextInput:getText()
     return self.text
 end
@@ -50,19 +65,28 @@ end
 ---@param my number
 ---@return boolean
 function TextInput:hitTest(mx, my)
-    local x, y = self:getWorldPosition()
-    local w = self.w * (self.sx or 1)
-    local h = self.h * (self.sy or 1)
+    local x, y, w, h = self:getWorldAABB()
     return mx >= x and mx <= x + w and my >= y and my <= y + h
 end
 
 ---
 ---@param x number
 ---@param y number
----@param button number
+---@param button integer
 function TextInput:mousepressed(x, y, button)
     if button ~= 1 then return end
-    self.focused = self:hitTest(x, y)
+    local focus = self:hitTest(x, y)
+    if focus ~= self.focused then
+        self.focused = focus
+        if love.keyboard and love.keyboard.hasTextInput and love.keyboard.setTextInput then
+            if self.focused and love.keyboard.hasTextInput() == false then
+                local wx, wy = self:getWorldPosition()
+                love.keyboard.setTextInput(true, wx, wy, self.w, self.h)
+            elseif not self.focused and love.keyboard.hasTextInput() == true then
+                love.keyboard.setTextInput(false)
+            end
+        end
+    end
 end
 
 ---
@@ -89,6 +113,25 @@ function TextInput:textinput(t)
     local right = string.sub(self.text, self.caret + 1)
     self.text = left .. t .. right
     self.caret = self.caret + #t
+end
+
+-- 可选：触摸直接聚焦（移动端）
+---@param id number
+---@param x number
+---@param y number
+function TextInput:touchpressed(id, x, y)
+    local focus = self:hitTest(x, y)
+    if focus ~= self.focused then
+        self.focused = focus
+        if love.keyboard and love.keyboard.hasTextInput and love.keyboard.setTextInput then
+            if self.focused and love.keyboard.hasTextInput() == false then
+                local wx, wy = self:getWorldPosition()
+                love.keyboard.setTextInput(true, wx, wy, self.w, self.h)
+            elseif not self.focused and love.keyboard.hasTextInput() == true then
+                love.keyboard.setTextInput(false)
+            end
+        end
+    end
 end
 
 ---comment

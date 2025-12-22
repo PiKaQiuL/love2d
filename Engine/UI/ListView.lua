@@ -118,9 +118,8 @@ end
 ---@param my number
 ---@return boolean
 function ListView:hitTest(mx, my)
-    local x, y = self:getWorldPosition()
-    local w = self.w * (self.sx or 1)
-    local h = self:getHeight() * (self.sy or 1)
+    local x, y, w, h = self:getWorldAABB()
+    h = self:getHeight() -- 高度按内容高度
     return mx >= x and mx <= x + w and my >= y and my <= y + h
 end
 
@@ -129,7 +128,7 @@ end
 ---@param my number
 ---@return number|nil
 function ListView:indexAt(mx, my)
-    local x, y = self:getWorldPosition()
+    local x, y = self:getWorldAABB()
     local startIndex = math.floor((self.scrollY or 0) / self.itemHeight) + 1
     local offsetY = -((self.scrollY or 0) % self.itemHeight)
     local cy = my - y - self.padding - offsetY
@@ -213,7 +212,7 @@ function ListView:mousepressed(mx, my, button)
     if button ~= 1 then return end
     if not self:hitTest(mx, my) then return end
     -- 处理滚动条点击或拖拽
-    local x, y = self:getWorldPosition()
+    local x, y = self:getWorldAABB()
     local viewportH = self:getViewportHeight()
     local contentH = self:getContentHeight()
     if contentH > viewportH then
@@ -252,7 +251,7 @@ end
 function ListView:mousemoved(mx, my)
     -- 拖动滚动拇指
     if self._drag.active then
-        local x, y = self:getWorldPosition()
+        local x, y = self:getWorldAABB()
         local viewportH = self:getViewportHeight()
         local contentH = self:getContentHeight()
         local trackY = y + 1

@@ -53,18 +53,18 @@ local function boot()
 
     -- 默认接入输入系统，并暴露到 app.input 便于查询
     local input = Input()
-    app:addSystem(input)
+    app:addSystem(input, "input")
     app.input = input
     -- 平台系统：检测 OS/DPI 等并广播 platform:ready
-    app:addSystem(Platform())
+    app:addSystem(Platform(), "platform")
     -- 动画系统：补间轨道管理
     local anim = Animation()
-    app:addSystem(anim)
+    app:addSystem(anim, "animation")
     app.animation = anim
 
     -- 日志系统：写入项目 Logs 目录
     local logger = Logger({ level = 2 }) -- 默认 info
-    app:addSystem(logger)
+    app:addSystem(logger, "logger")
     app.logger = logger
 
     -- 引擎默认加载场景（Loading）

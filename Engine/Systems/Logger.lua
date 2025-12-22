@@ -38,7 +38,8 @@ local function ensureDir(dir)
 end
 
 function Logger:init(opts)
-    self.level = (opts and opts.level) or LEVELS.info
+    if self._ready then return end
+    self.level = self.level or (opts and opts.level) or LEVELS.info
     local base = love.filesystem.getSourceBaseDirectory()
     local src = love.filesystem.getSource()
     local s = sep()
@@ -76,6 +77,7 @@ function Logger:init(opts)
     else
         print("[logger] failed to open log file:", self.filePath)
     end
+    self._ready = true
 end
 
 function Logger:destroy()

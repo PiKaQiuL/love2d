@@ -105,4 +105,34 @@ function Scene:wheelmoved(dx, dy)
     -- 子类可重写
 end
 
+---@param id number
+---@param x number
+---@param y number
+---@param dx number|nil
+---@param dy number|nil
+---@param pressure number|nil
+function Scene:touchpressed(id, x, y, dx, dy, pressure)
+    -- 子类可重写
+end
+
+---@param id number
+---@param x number
+---@param y number
+---@param dx number|nil
+---@param dy number|nil
+---@param pressure number|nil
+function Scene:touchmoved(id, x, y, dx, dy, pressure)
+    -- 子类可重写
+end
+
+---@param id number
+---@param x number
+---@param y number
+---@param dx number|nil
+---@param dy number|nil
+---@param pressure number|nil
+function Scene:touchreleased(id, x, y, dx, dy, pressure)
+    -- 子类可重写
+end
+
 return Scene

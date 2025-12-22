@@ -44,6 +44,22 @@ Game/
 - 日志：框架内置 `Logger` 系统，日志文件每日写入项目根目录的 `Logs/` 目录，例如 `Logs/game-YYYY-MM-DD.log`。
 - 运行：在安装了 LÖVE 的环境中，进入项目目录运行 `love .` 即可；Windows 可直接执行 `love.exe` 指向项目路径。
 
+## JSON 工具与存档格式
+
+- JSON 工具：见 [Engine/Utils/Json.lua](Engine/Utils/Json.lua)，封装 `encode/decode`，默认使用 [Engine/plugin/dkjson/dkjson.lua](Engine/plugin/dkjson/dkjson.lua)。
+- 存档（Lua 表序列化，默认）：`app.storage:save("save1", tbl)` / `app.storage:load("save1")`。
+- 存档（JSON）：`app.storage:saveJson("save1", tbl, true)` / `app.storage:loadJson("save1")`。
+- 自动选择（推荐）：
+
+```lua
+-- 由 Config.Storage.format 决定默认格式（lua|json），也可每次覆盖
+app.storage:saveData("save1", tbl)                      -- 使用默认格式
+app.storage:saveData("save1", tbl, { format = "json", pretty = true })
+local data = app.storage:loadData("save1")              -- 使用默认格式
+```
+
+- 切换默认格式：在 [Engine/Core/Config.lua](Engine/Core/Config.lua) 将 `Storage.format` 改为 `"json"`，或运行时 `app.storage:setDefaultFormat("json")`。
+
 ## 快速集成
 
 示例将这些模块与 Love2D 的主循环连接：

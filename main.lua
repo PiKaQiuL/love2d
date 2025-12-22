@@ -48,6 +48,17 @@ function love.wheelmoved(dx, dy)
     if app and app.wheelmoved then app:wheelmoved(dx, dy) end
 end
 
+-- 触摸事件（移动端）
+function love.touchpressed(id, x, y, dx, dy, pressure)
+    if app and app.touchpressed then app:touchpressed(id, x, y, dx, dy, pressure) end
+end
+function love.touchmoved(id, x, y, dx, dy, pressure)
+    if app and app.touchmoved then app:touchmoved(id, x, y, dx, dy, pressure) end
+end
+function love.touchreleased(id, x, y, dx, dy, pressure)
+    if app and app.touchreleased then app:touchreleased(id, x, y, dx, dy, pressure) end
+end
+
 -- 可选：自定义主循环，稳定帧率并限制 dt
 -- - 读取 TARGET_FPS 控制休眠节奏
 -- - 限制 dt 最大值，避免数值系统跳变（建议 0.1～0.2）

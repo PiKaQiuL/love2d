@@ -87,4 +87,34 @@ function System:wheelmoved(dx, dy)
     -- 可在子类中重写
 end
 
+---@param id number
+---@param x number
+---@param y number
+---@param dx number|nil
+---@param dy number|nil
+---@param pressure number|nil
+function System:touchpressed(id, x, y, dx, dy, pressure)
+    -- 可在子类中重写
+end
+
+---@param id number
+---@param x number
+---@param y number
+---@param dx number|nil
+---@param dy number|nil
+---@param pressure number|nil
+function System:touchmoved(id, x, y, dx, dy, pressure)
+    -- 可在子类中重写
+end
+
+---@param id number
+---@param x number
+---@param y number
+---@param dx number|nil
+---@param dy number|nil
+---@param pressure number|nil
+function System:touchreleased(id, x, y, dx, dy, pressure)
+    -- 可在子类中重写
+end
+
 return System

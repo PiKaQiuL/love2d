@@ -357,7 +357,7 @@ end
 ---@return nil
 function Layout:draw()
     if not self.visible then return end
-    local x, y = self:getWorldPosition()
+    local x, y = self:getWorldAABB()
     if type(self.preRender) == "function" then self:preRender(x, y) end
     if self.bg then
         love.graphics.setColor(self.bg)

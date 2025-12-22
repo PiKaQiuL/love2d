@@ -8,8 +8,27 @@ local Panel = require("Engine.UI.Panel")
 local Label = require("Engine.UI.Label")
 local ListView = require("Engine.UI.ListView")
 local Input = require("Engine.Systems.Input")
+local Vector2 = require("Engine.Utils.Vector2")
 
 local MainScene = Scene:extend()
+
+local function deepEqual(a, b, seen)
+    if a == b then return true end
+    local ta, tb = type(a), type(b)
+    if ta ~= tb then return false end
+    if ta ~= "table" then return a == b end
+    seen = seen or {}
+    if seen[a] and seen[a] == b then return true end
+    seen[a] = b
+    local k
+    for k in pairs(a) do
+        if not deepEqual(a[k], b[k], seen) then return false end
+    end
+    for k in pairs(b) do
+        if a[k] == nil then return false end
+    end
+    return true
+end
 
 function MainScene:enter()
     if self.app and self.app.logger then self.app.logger:info("MainScene enter") end
@@ -29,6 +48,11 @@ function MainScene:enter()
         local lbl = Label("Item " .. i, 6, 6 + (i - 1) * 18)
         self.demoPanel:add(lbl)
     end
+
+    -- Pivot + Vector2 示例：中心锚点的面板，使用向量设置位置
+    self.pivotPanel = Panel(0, 0, 100, 40)
+    self.pivotPanel:setPivotCenter()
+    self.pivotPanel:setPositionV(Vector2(300, 80))
 
     -- 可滚动列表示例：与剪裁结合
     self.scrollList = ListView(400, 140, 200, 18, { maxVisible = 6 })
@@ -91,6 +115,9 @@ function MainScene:enter()
     self.app.timer:every(2, function()
         self.log:add("Tick at " .. tostring(os.time()))
     end)
+
+    self.log:add("Press [F3] to run storage tests (Lua/JSON).")
+    self.log:add("Press [F4] to load Data JSON (sample_*).")
 end
 
 function MainScene:update(dt)
@@ -112,6 +139,10 @@ function MainScene:draw()
     if self.demoPanel and self.demoPanel.draw then
         self.demoPanel:draw()
     end
+    -- 绘制中心锚点面板
+    if self.pivotPanel and self.pivotPanel.draw then
+        self.pivotPanel:draw()
+    end
     -- 绘制可滚动列表
     if self.scrollList and self.scrollList.draw then
         self.scrollList:draw()
@@ -124,11 +155,90 @@ function MainScene:keypressed(key)
         if self.app and self.app.switchScene then self.app:switchScene("button-test") end
         return
     end
+    if key == "f5" then
+        if self.app and self.app.logger then self.app.logger:info("Switch to vec-anim-test scene") end
+        if self.app and self.app.scenes then
+            -- 懒注册：仅首次按下时注册
+            if not self._vecTestRegistered then
+                local ok, SceneMod = pcall(require, "Game.Scenes.VecAnimTestScene")
+                if ok and SceneMod then
+                    self.app.scenes:register("vec-anim-test", SceneMod(self.app))
+                    self._vecTestRegistered = true
+                else
+                    if self.app and self.app.logger then self.app.logger:error("VecAnimTestScene require failed") end
+                    return
+                end
+            end
+            self.app:switchScene("vec-anim-test")
+        end
+        return
+    end
+    if key == "f3" then
+        if self.app and self.app.logger then self.app.logger:info("Run storage tests") end
+        self:runStorageTests()
+        return
+    end
+    if key == "f4" then
+        if self.app and self.app.logger then self.app.logger:info("Run Data JSON read tests") end
+        self:runDataJsonTests()
+        return
+    end
     if key == "space" then
         self.log:add("Space pressed: +5 gold")
         if self.app and self.app.logger then self.app.logger:info("Space adds 5 gold") end
         local g = self.resources:get("gold")
         if g then g.amount = g.amount + 5 end
+    end
+end
+
+function MainScene:runStorageTests()
+    local storage = self.app and self.app.storage
+    if not storage then
+        self.log:add("[test] storage not available")
+        return
+    end
+    local sample = { a = 1, s = "hi", nested = { x = 3 }, arr = {1,2,3}, flag = true }
+    -- JSON
+    local ok1, err1 = storage:saveData("test_json", sample, { format = "json", pretty = true })
+    local jdata, jerr = storage:loadData("test_json", { format = "json" })
+    local passJ = ok1 and jdata and deepEqual(sample, jdata)
+    local msgJ = passJ and "PASS" or ("FAIL: " .. tostring(err1 or jerr))
+    self.log:add("[test][json] " .. msgJ)
+    if self.app and self.app.logger then self.app.logger:info("[test][json] " .. msgJ) end
+
+    -- Lua
+    local ok2, err2 = storage:saveData("test_lua", sample, { format = "lua" })
+    local ldata = storage:loadData("test_lua", { format = "lua" })
+    local passL = ok2 and ldata and deepEqual(sample, ldata)
+    local msgL = passL and "PASS" or ("FAIL: " .. tostring(err2))
+    self.log:add("[test][lua] " .. msgL)
+    if self.app and self.app.logger then self.app.logger:info("[test][lua] " .. msgL) end
+end
+
+function MainScene:runDataJsonTests()
+    local storage = self.app and self.app.storage
+    if not storage then
+        self.log:add("[data] storage not available")
+        return
+    end
+    -- 从 Data 目录读取示例 JSON
+    local items, ierr = storage:loadData("Data/sample_items", { format = "json" })
+    if items and type(items) == "table" then
+        local count = #items
+        self.log:add(string.format("[data][items] loaded %d items", count))
+        if self.app and self.app.logger then self.app.logger:infof("[data][items] %d loaded", count) end
+    else
+        self.log:add("[data][items] FAIL: " .. tostring(ierr))
+        if self.app and self.app.logger then self.app.logger:errorf("[data][items] %s", tostring(ierr)) end
+    end
+
+    local cfg, cerr = storage:loadData("Data/sample_config", { format = "json" })
+    if cfg and type(cfg) == "table" and cfg.ui and cfg.resources then
+        self.log:add("[data][config] PASS: has ui/resources")
+        if self.app and self.app.logger then self.app.logger:info("[data][config] PASS") end
+    else
+        self.log:add("[data][config] FAIL: " .. tostring(cerr))
+        if self.app and self.app.logger then self.app.logger:errorf("[data][config] %s", tostring(cerr)) end
     end
 end
 

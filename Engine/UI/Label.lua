@@ -5,7 +5,7 @@ local Defaults = require("Engine.UI.Defaults")
 ---
 ---@class Label : Widget
 ---@field text string
----@field color number[]
+---@field color Color
 ---@field font love.Font|nil
 local Label = Widget:extend()
 
@@ -13,7 +13,7 @@ local Label = Widget:extend()
 ---@param text string|nil
 ---@param x number|nil
 ---@param y number|nil
----@param color table|nil
+---@param color Color|nil
 function Label:init(text, x, y, color)
     Widget.init(self, x or 0, y or 0, 0, 0)
     self.text = tostring(text or "")
@@ -23,6 +23,7 @@ end
 
 ---
 ---@param t string|nil
+---@return Label
 function Label:setText(t)
     self.text = tostring(t or "")
     return self
@@ -33,6 +34,7 @@ end
 ---@param g number|nil
 ---@param b number|nil
 ---@param a number|nil
+---@return Label
 function Label:setColor(r, g, b, a)
     self.color = { r or 1, g or 1, b or 1, a or 1 }
     return self
@@ -40,13 +42,13 @@ end
 
 ---
 ---@param font love.Font
+---@return Label
 function Label:setFont(font)
     self.font = font
     return self
 end
 
 ---
----@return nil
 ---@param x number
 ---@param y number
 function Label:render(x, y)

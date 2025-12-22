@@ -66,9 +66,7 @@ end
 ---@param my number
 ---@return boolean
 function Panel:hitTest(mx, my)
-    local x, y = self:getWorldPosition()
-    local w = self.w * (self.sx or 1)
-    local h = self.h * (self.sy or 1)
+    local x, y, w, h = self:getWorldAABB()
     return mx >= x and mx <= x + w and my >= y and my <= y + h
 end
 

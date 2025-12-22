@@ -37,6 +37,14 @@ function Widget:setSize(w, h)
     return self
 end
 
+--- 使用向量设置尺寸（便捷）
+---@param v { x:number, y:number }
+---@return Widget
+function Widget:setSizeV(v)
+    if v then self.w = v.x or self.w; self.h = v.y or self.h end
+    return self
+end
+
 --- 设置组件缩放
 ---@param sx number|nil
 ---@param sy number|nil
@@ -136,16 +144,14 @@ end
 ---@return boolean
 function Widget:hitTest(mx, my)
     if not self.visible then return false end
-    local x, y = self:getWorldPosition()
-    local w = (self.w or 0) * (self.sx or 1)
-    local h = (self.h or 0) * (self.sy or 1)
+    local x, y, w, h = self:getWorldAABB()
     return mx >= x and mx <= x + w and my >= y and my <= y + h
 end
 
 --- 统一绘制流程：先渲染自身，再绘制子节点
 function Widget:draw()
     if not self.visible then return end
-    local x, y = self:getWorldPosition()
+    local x, y = self:getWorldAABB()
     if type(self.preRender) == "function" then self:preRender(x, y) end
     if type(self.render) == "function" then self:render(x, y) end
     for i = 1, #self.children do

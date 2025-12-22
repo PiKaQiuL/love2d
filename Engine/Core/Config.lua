@@ -12,6 +12,10 @@ local Config = {
         spacing = 8,
         padding = 6,
         fontSize = 14
+    },
+    -- 存档默认格式："lua" | "json"
+    Storage = {
+        format = "lua" -- 可改为 "json" 以使用 JSON 存档
     }
 }
 

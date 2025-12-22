@@ -12,19 +12,46 @@ local Label = require("Engine.UI.Label")
 local Enums = require("Engine.Core.Enums")
 local Defaults = require("Engine.UI.Defaults")
 
+--- 按钮状态别名（与 Enums.ButtonState 一致），本地别名避免与全局重复
+---@alias UIButtonState "normal"|"hover"|"pressed"|"disabled"
+---@class ButtonColors
+---@field normal Color
+---@field hover Color
+---@field pressed Color
+---@field disabled Color
+---@field border Color
+---@field text Color
+---@field focus Color
+
+--- 创建按钮时可选参数
+---@class ButtonOptions
+---@field disabled boolean|nil         是否禁用
+---@field focused boolean|nil          初始是否聚焦
+---@field onClick fun(self: Button)|nil 点击回调（接收自身）
+---@field colors ButtonColors|nil      颜色集，默认取 Defaults.buttonColors
+---@field borderWidth number|nil       边框宽度，默认 1
+
 ---@class Button : Widget
----@field focused boolean
----@field onClick function|nil
----@field colors table
----@field borderWidth number
----@field label Label
+---@field text string                 文本
+---@field w number                    宽度
+---@field h number                    高度
+---@field state ButtonState           按钮状态（参考 Enums.ButtonState）
+---@field disabled boolean            是否禁用
+---@field focused boolean             是否聚焦
+---@field onClick fun(self: Button)|nil 点击回调
+---@field colors ButtonColors         颜色集
+---@field borderWidth number          边框宽度
+---@field label Label                 文本标签
 local Button = Widget:extend()
 
 
--- @param y number
--- @param w number
--- @param h number
--- @param opts table|nil
+---
+---@param text string|nil
+---@param x number|nil
+---@param y number|nil
+---@param w number|nil
+---@param h number|nil
+---@param opts ButtonOptions|nil
 function Button:init(text, x, y, w, h, opts)
     opts = opts or {}
     local bw = w or 120
@@ -47,12 +74,16 @@ end
 
 ---
 ---@param d boolean|nil
+---@return Button
 function Button:setDisabled(d)
     self.disabled = not not d
     self.state = self.disabled and Enums.ButtonState.disabled or Enums.ButtonState.normal
     return self
 end
 
+---comment
+---@param x number
+---@param y number
 function Button:render(x, y)
     local c = self.colors[self.state] or self.colors[Enums.ButtonState.normal]
     love.graphics.setColor(c)
@@ -68,13 +99,16 @@ function Button:render(x, y)
     love.graphics.setColor(1,1,1,1)
 end
 
+---@param mx number
+---@param my number
+---@return boolean
 function Button:hitTest(mx, my)
-    local x, y = self:getWorldPosition()
-    local w = self.w * (self.sx or 1)
-    local h = self.h * (self.sy or 1)
+    local x, y, w, h = self:getWorldAABB()
     return mx >= x and mx <= x + w and my >= y and my <= y + h
 end
 
+---@param x number
+---@param y number
 function Button:mousemoved(x, y)
     if self.disabled then return end
     if self:hitTest(x, y) then
@@ -84,6 +118,10 @@ function Button:mousemoved(x, y)
     end
 end
 
+---comment
+---@param x number
+---@param y number
+---@param button integer
 function Button:mousepressed(x, y, button)
     if self.disabled then return end
     if button == Enums.MouseButton.left then
@@ -96,6 +134,10 @@ function Button:mousepressed(x, y, button)
     end
 end
 
+---comment
+---@param x number
+---@param y number
+---@param button integer
 function Button:mousereleased(x, y, button)
     if self.disabled then return end
     if button == Enums.MouseButton.left then
@@ -107,11 +149,16 @@ function Button:mousereleased(x, y, button)
     end
 end
 
+---comment
+---@param f boolean
+---@return Button
 function Button:setFocus(f)
     self.focused = not not f
     return self
 end
 
+---comment
+---@param key love.KeyConstant
 function Button:keypressed(key)
     if self.disabled or not self.focused then return end
     if key == "return" or key == "space" then

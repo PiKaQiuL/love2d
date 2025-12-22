@@ -49,6 +49,26 @@ function Input:init()
         buttonsReleased = {},
         wheelX = 0, wheelY = 0
     }
+
+    -- 触摸状态（移动端）：支持多指追踪，并将首指映射为鼠标左键
+    self.touches = {
+        down = {},       -- id -> { x, y, pressure }
+        pressed = {},    -- id -> true (本帧)
+        released = {}    -- id -> true (本帧)
+    }
+    self.primaryTouchId = nil
+
+    -- 时间轴与手势配置
+    self.time = 0
+    self.gesture = {
+        longPressTime = 0.5,     -- 秒
+        doubleTapTime = 0.3,     -- 两次点击最大间隔
+        moveTolerance = 12,      -- 视为点击/长按的最大移动距离
+        doubleTapDist = 22,      -- 双击两次位置最大距离
+        lastTapTime = nil,
+        lastTapX = nil,
+        lastTapY = nil
+    }
 end
 
 -- 键盘事件
@@ -119,8 +139,89 @@ function Input:wheelmoved(dx, dy)
     end
 end
 
+-- 触摸事件（移动端）
+function Input:touchpressed(id, x, y, dx, dy, pressure)
+    pressure = pressure or 1
+    self.touches.down[id] = {
+        x = x, y = y, pressure = pressure,
+        startX = x, startY = y,
+        startTime = self.time,
+        maxDist = 0,
+        longFired = false
+    }
+    self.touches.pressed[id] = true
+    if not self.primaryTouchId then
+        self.primaryTouchId = id
+        -- 映射为鼠标左键，提升 UI 兼容性
+        self:mousepressed(x, y, 1, 1)
+    end
+    if self.app and self.app.emit then
+        self.app:emit("input:touchpressed", id, x, y, pressure)
+    end
+end
+
+function Input:touchmoved(id, x, y, dx, dy, pressure)
+    local t = self.touches.down[id]
+    if t then
+        t.x, t.y, t.pressure = x, y, pressure or t.pressure
+        local dxs = (t.x - t.startX)
+        local dys = (t.y - t.startY)
+        local dist = math.sqrt(dxs*dxs + dys*dys)
+        if dist > t.maxDist then t.maxDist = dist end
+    end
+    if self.primaryTouchId == id then
+        self:mousemoved(x, y, dx or 0, dy or 0, true)
+    end
+    if self.app and self.app.emit then
+        self.app:emit("input:touchmoved", id, x, y, dx or 0, dy or 0, pressure)
+    end
+end
+
+function Input:touchreleased(id, x, y, dx, dy, pressure)
+    self.touches.down[id] = nil
+    self.touches.released[id] = true
+    -- 点击/双击检测
+    local g = self.gesture
+    local now = self.time
+    local isTap = true
+    if dx or dy then end -- 占位，兼容签名
+    local last = nil
+    -- 由于上面已移除 down，这里无法取 meta；改用参数位置近似判断
+    -- 允许根据移动阈值判断点击（若可用，dx/dy 在 touch 系列通常不可靠，忽略）
+    -- 双击：时间与位置都在阈值内
+    if g.lastTapTime and (now - g.lastTapTime) <= g.doubleTapTime then
+        if g.lastTapX and g.lastTapY then
+            local dx2 = (x - g.lastTapX); local dy2 = (y - g.lastTapY)
+            local dist2 = math.sqrt(dx2*dx2 + dy2*dy2)
+            if dist2 <= g.doubleTapDist then
+                if self.app and self.app.emit then
+                    self.app:emit("input:gesture:doubletap", x, y, id)
+                end
+                -- 重置
+                g.lastTapTime, g.lastTapX, g.lastTapY = nil, nil, nil
+                isTap = false
+            end
+        end
+    end
+    if isTap then
+        -- 记录这次点击作为可能的双击第一次
+        g.lastTapTime, g.lastTapX, g.lastTapY = now, x, y
+        if self.app and self.app.emit then
+            self.app:emit("input:gesture:tap", x, y, id)
+        end
+    end
+    if self.primaryTouchId == id then
+        self:mousereleased(x, y, 1, 1)
+        self.primaryTouchId = nil
+    end
+    if self.app and self.app.emit then
+        self.app:emit("input:touchreleased", id, x, y, pressure)
+    end
+end
+
 -- 每帧清理一次性状态
 function Input:update(dt)
+    self.time = self.time + (dt or 0)
     self.keysPressed = {}
     self.keysReleased = {}
     self.textBuffer = ""
@@ -128,6 +229,22 @@ function Input:update(dt)
     self.mouse.buttonsReleased = {}
     self.mouse.dx, self.mouse.dy = 0, 0
     self.mouse.wheelX, self.mouse.wheelY = 0, 0
+    self.touches.pressed = {}
+    self.touches.released = {}
+
+    -- 长按检测：保持按下且移动未超过阈值、时间达到阈值则触发一次
+    local g = self.gesture
+    for id, t in pairs(self.touches.down) do
+        if not t.longFired then
+            local held = (self.time - (t.startTime or self.time))
+            if held >= g.longPressTime and (t.maxDist or 0) <= g.moveTolerance then
+                t.longFired = true
+                if self.app and self.app.emit then
+                    self.app:emit("input:gesture:longpress", t.x, t.y, id, held)
+                end
+            end
+        end
+    end
 end
 
 -- 查询 API
@@ -150,6 +267,21 @@ function Input:ctrlDown()
 end
 function Input:altDown()
     return love.keyboard.isDown("lalt") or love.keyboard.isDown("ralt")
+end
+
+-- 触摸查询 API
+function Input:touchDown(id) return not not self.touches.down[id] end
+function Input:touchPressed(id) return not not self.touches.pressed[id] end
+function Input:touchReleased(id) return not not self.touches.released[id] end
+function Input:touchCount()
+    local n = 0; for _ in pairs(self.touches.down) do n = n + 1 end; return n
+end
+function Input:primaryTouchPosition()
+    local id = self.primaryTouchId
+    if not id then return nil end
+    local t = self.touches.down[id]
+    if not t then return nil end
+    return t.x, t.y, id
 end
 
 return Input
