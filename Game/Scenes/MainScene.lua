@@ -10,6 +10,7 @@ local ListView = require("Engine.UI.ListView")
 local Input = require("Engine.Systems.Input")
 local Vector2 = require("Engine.Utils.Vector2")
 local Behavior = require("Engine.AI.Behavior")
+local Color = require("Engine.Utils.Color")
 
 local MainScene = Scene:extend()
 
@@ -48,7 +49,7 @@ function MainScene:enter()
         :setPosition(400, 40)
         :setSize(160, 80)
         :setBorderWidth(2)
-        :setFill({0.15, 0.15, 0.18, 0.95})
+        :setFill(Color({0.15, 0.15, 0.18, 0.95}))
     for i = 1, 10 do
         local lbl = Label()
             :setText("Item " .. i)

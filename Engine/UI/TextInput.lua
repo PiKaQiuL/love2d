@@ -1,6 +1,7 @@
 -- Engine/UI/TextInput.lua
 local Widget = require("Engine.UI.Widget")
 local Defaults = require("Engine.UI.Defaults")
+local ColorHelper = require("Engine.Utils.ColorHelper")
 
 --- 输入框配色
 ---@class TextInputColors
@@ -179,13 +180,13 @@ end
 ---@param x number
 ---@param y number
 function TextInput:render(x, y)
-    love.graphics.setColor(self.colors.bg)
+    ColorHelper.apply(self.colors.bg)
     love.graphics.rectangle("fill", x, y, self.w, self.h)
-    love.graphics.setColor(self.colors.border)
+    ColorHelper.apply(self.colors.border)
     love.graphics.rectangle("line", x, y, self.w, self.h)
 
     local showPlaceholder = (self.text == "" and not self.focused and self.placeholder ~= "")
-    love.graphics.setColor(showPlaceholder and self.colors.placeholder or self.colors.text)
+    ColorHelper.apply(showPlaceholder and self.colors.placeholder or self.colors.text)
     local pad = 6
     love.graphics.print(showPlaceholder and self.placeholder or self.text, x + pad, y + (self.h - 14) / 2)
 
@@ -193,7 +194,7 @@ function TextInput:render(x, y)
         local t = love.timer.getTime()
         if math.floor(t * 1.2) % 2 == 0 then
             local caretX = x + pad + love.graphics.getFont():getWidth(string.sub(self.text, 1, self.caret))
-            love.graphics.setColor(self.colors.text)
+            ColorHelper.apply(self.colors.text)
             love.graphics.line(caretX, y + 5, caretX, y + self.h - 5)
         end
     end

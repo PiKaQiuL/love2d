@@ -18,6 +18,9 @@
 --- 字体规格（文档类型，实际通常为 love.Font）
 ---@alias FontSpec love.Font|string|{ name: string, size: number }
 
+--- 颜色类型别名：兼容 Color 对象、数组和带字段表
+---@alias ColorLike Color|number[]|{ r: number, g: number, b: number, a: number|nil }
+
 --- 外边距/内边距对象
 ---@class Margin
 ---@field l number
@@ -40,11 +43,11 @@
 
 --- UI 列表配色结构
 ---@class ListColors
----@field bg Color
----@field border Color
----@field text Color
----@field hover Color
----@field selected Color
+---@field bg ColorLike
+---@field border ColorLike
+---@field text ColorLike
+---@field hover ColorLike
+---@field selected ColorLike
 
 --- Widget 渲染回调接口（可选实现）
 ---@class WidgetCallbacks

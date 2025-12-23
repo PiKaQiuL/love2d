@@ -11,12 +11,13 @@ local ListView = require("Engine.UI.ListView")
 local ProgressBar = require("Engine.UI.ProgressBar")
 local Enums = require("Engine.Core.Enums")
 local Vector2 = require("Engine.Utils.Vector2")
+local Color = require("Engine.Utils.Color")
 
 local ChainTestScene = Scene:extend()
 
 function ChainTestScene:enter()
-    if self.app and self.app.logger then 
-        self.app.logger:info("ChainTest scene enter") 
+    if self.app and self.app.logger then
+        self.app.logger:info("ChainTest scene enter")
     end
 
     -- 标题
@@ -37,7 +38,7 @@ function ChainTestScene:enter()
     local btn1 = Button()
         :setText("Normal Button")
         :setSize(160, 32)
-        :setOnClick(function(btn) 
+        :setOnClick(function(btn)
             print("Button 1 clicked!")
         end)
 
@@ -45,7 +46,7 @@ function ChainTestScene:enter()
         :setText("Disabled Button")
         :setSize(160, 32)
         :setDisabled(true)
-        :setOnClick(function(btn) 
+        :setOnClick(function(btn)
             print("This should not print")
         end)
 
@@ -74,8 +75,8 @@ function ChainTestScene:enter()
     self.panel = Panel()
         :setPosition(340, 40)
         :setSize(260, 120)
-        :setFill({ 0.1, 0.1, 0.15, 0.95 })
-        :setBorder({ 0.8, 0.9, 1.0, 0.8 })
+        :setFill(Color { 0.1, 0.1, 0.15, 0.95 })
+        :setBorder(Color { 0.8, 0.9, 1.0, 0.8 })
         :setBorderWidth(2)
         :setPadding(8)
 
@@ -91,10 +92,10 @@ function ChainTestScene:enter()
         :setSize(260, 32)
         :setPlaceholder("Enter text here...")
         :setColors({
-            bg = { 0.05, 0.05, 0.1, 1 },
-            border = { 0.6, 0.8, 1.0, 0.9 },
-            text = { 1, 1, 1, 1 },
-            placeholder = { 0.5, 0.5, 0.6, 0.8 }
+            bg = Color { 0.05, 0.05, 0.1, 1 },
+            border = Color { 0.6, 0.8, 1.0, 0.9 },
+            text = Color { 1, 1, 1, 1 },
+            placeholder = Color { 0.5, 0.5, 0.6, 0.8 }
         })
 
     -- 列表视图示例
@@ -159,8 +160,8 @@ end
 
 function ChainTestScene:keypressed(key)
     if key == "f1" then
-        if self.app then 
-            self.app:switchScene("main") 
+        if self.app then
+            self.app:switchScene("main")
         end
         return
     end
@@ -218,7 +219,7 @@ end
 
 function ChainTestScene:draw()
     love.graphics.setColor(1, 1, 1, 1)
-    
+
     -- 绘制所有组件
     if self.title then self.title:draw() end
     if self.buttonLayout then self.buttonLayout:draw() end
@@ -228,7 +229,7 @@ function ChainTestScene:draw()
     if self.progress1 then self.progress1:draw() end
     if self.progress2 then self.progress2:draw() end
     if self.hint then self.hint:draw() end
-    
+
     -- 显示输入框的当前文本
     if self.input then
         love.graphics.setColor(0.8, 0.9, 1, 1)
@@ -237,8 +238,8 @@ function ChainTestScene:draw()
 end
 
 function ChainTestScene:leave()
-    if self.app and self.app.logger then 
-        self.app.logger:info("ChainTest scene leave") 
+    if self.app and self.app.logger then
+        self.app.logger:info("ChainTest scene leave")
     end
 end
 

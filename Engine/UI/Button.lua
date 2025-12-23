@@ -15,13 +15,13 @@ local ColorHelper = require("Engine.Utils.ColorHelper")
 
 
 ---@class ButtonColors
----@field normal Color
----@field hover Color
----@field pressed Color
----@field disabled Color
----@field border Color
----@field text Color
----@field focus Color
+---@field normal ColorLike
+---@field hover ColorLike
+---@field pressed ColorLike
+---@field disabled ColorLike
+---@field border ColorLike
+---@field text ColorLike
+---@field focus ColorLike
 
 --- 创建按钮时可选参数
 ---@class ButtonOptions

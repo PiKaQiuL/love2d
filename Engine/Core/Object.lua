@@ -104,6 +104,20 @@ function Object:new(...)
         end
     end
 
+    -- 传播类上的运算/显示等元方法到实例元表，使运算符重载生效
+    local metaFns = {
+        "__add", "__sub", "__mul", "__div", "__unm", "__len", "__eq", "__tostring"
+    }
+    for i = 1, #metaFns do
+        local k = metaFns[i]
+        if class[k] ~= nil then
+            mt[k] = class[k]
+        end
+    end
+
+    -- 让实例的元表也具备 super 链，便于 Object:is() 沿链判断类型
+    mt.super = class
+
     setmetatable(instance, mt)
 
     if instance.init then

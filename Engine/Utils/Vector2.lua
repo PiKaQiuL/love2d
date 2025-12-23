@@ -152,11 +152,14 @@ end
 ---@return any
 function Vector2.__mul(a, b)
     local ta, tb = type(a), type(b)
-    if ta == "number" and getmetatable(b) == Vector2 then
+    local function isVec(v)
+        return type(v) == "table" and ((getmetatable(v) == Vector2) or (v.is and v:is(Vector2)))
+    end
+    if ta == "number" and isVec(b) then
         return Vector2(a * b.x, a * b.y)
-    elseif tb == "number" and getmetatable(a) == Vector2 then
+    elseif tb == "number" and isVec(a) then
         return Vector2(a.x * b, a.y * b)
-    elseif getmetatable(a) == Vector2 and getmetatable(b) == Vector2 then
+    elseif isVec(a) and isVec(b) then
         return a.x * b.x + a.y * b.y
     end
     error("Vector2.__mul: unsupported operands")
@@ -167,7 +170,10 @@ end
 ---@param b number
 ---@return Vector2
 function Vector2.__div(a, b)
-    if type(b) == "number" then
+    local function isVec(v)
+        return type(v) == "table" and ((getmetatable(v) == Vector2) or (v.is and v:is(Vector2)))
+    end
+    if isVec(a) and type(b) == "number" then
         return Vector2(a.x / b, a.y / b)
     end
     error("Vector2.__div: divisor must be number")
