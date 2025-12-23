@@ -10,5 +10,12 @@
     "Data"
   ],
   "diagnostics.globals": ["love"],
-  "hint.enable": true
+  "hint.enable": true,
+    "workspace.library": [
+        "${addons}/love2d/module/library"
+    ],
+    "runtime.special": {
+        "include": "require",
+        "love.filesystem.load": "loadfile"
+    }
 }

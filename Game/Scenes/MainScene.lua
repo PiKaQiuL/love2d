@@ -42,20 +42,41 @@ function MainScene:enter()
     self.log = TextPanel(10, 140, 580)
     self.log:add("Press [Space] to log a message.")
 
-    -- 示例 Panel：启用剪裁，内部子元素超出时不溢出
-    self.demoPanel = Panel(400, 40, 160, 80)
+    -- 示例 Panel：启用剪裁，内部子元素超出时不溢出（使用链式调用）
+    self.demoPanel = Panel()
+        :setPosition(400, 40)
+        :setSize(160, 80)
+        :setBorderWidth(2)
+        :setFill({0.15, 0.15, 0.18, 0.95})
     for i = 1, 10 do
-        local lbl = Label("Item " .. i, 6, 6 + (i - 1) * 18)
+        local lbl = Label()
+            :setText("Item " .. i)
+            :setPosition(6, 6 + (i - 1) * 18)
+            :setColor(0.9, 0.9, 1.0, 1.0)
         self.demoPanel:add(lbl)
     end
 
-    -- Pivot + Vector2 示例：中心锚点的面板，使用向量设置位置
-    self.pivotPanel = Panel(0, 0, 100, 40)
-    self.pivotPanel:setPivotCenter()
-    self.pivotPanel:setPositionV(Vector2(300, 80))
+    -- Pivot + Vector2 示例：中心锚点的面板，使用向量设置位置（链式调用）
+    self.pivotPanel = Panel()
+        :setSize(100, 40)
+        :setPivotCenter()
+        :setPositionV(Vector2(300, 80))
+        :setFill({0.2, 0.3, 0.4, 0.9})
+        :setBorder({0.8, 0.9, 1.0, 1.0})
 
-    -- 可滚动列表示例：与剪裁结合
-    self.scrollList = ListView(400, 140, 200, 18, { maxVisible = 6 })
+    -- 可滚动列表示例：与剪裁结合（使用链式调用）
+    self.scrollList = ListView()
+        :setPosition(400, 140)
+        :setWidth(200)
+        :setItemHeight(18)
+        :setMaxVisible(6)
+        :setColors({
+            bg = {0.05, 0.05, 0.08, 1},
+            border = {0.8, 0.8, 1.0, 0.9},
+            text = {1, 1, 1, 1},
+            hover = {0.2, 0.25, 0.3, 0.8},
+            selected = {0.3, 0.5, 0.3, 0.8}
+        })
     for i = 1, 30 do
         self.scrollList:add("Row " .. i)
     end
@@ -118,6 +139,8 @@ function MainScene:enter()
 
     self.log:add("Press [F3] to run storage tests (Lua/JSON).")
     self.log:add("Press [F4] to load Data JSON (sample_*).")
+    self.log:add("Press [F6] to switch to ChainTestScene.")
+    self.log:add("Press [F7] to test Color utility class.")
 end
 
 function MainScene:update(dt)
@@ -170,6 +193,42 @@ function MainScene:keypressed(key)
                 end
             end
             self.app:switchScene("vec-anim-test")
+        end
+        return
+    end
+    if key == "f6" then
+        if self.app and self.app.logger then self.app.logger:info("Switch to chain-test scene") end
+        if self.app and self.app.scenes then
+            -- 懒注册：仅首次按下时注册
+            if not self._chainTestRegistered then
+                local ok, SceneMod = pcall(require, "Game.Scenes.ChainTestScene")
+                if ok and SceneMod then
+                    self.app.scenes:register("chain-test", SceneMod(self.app))
+                    self._chainTestRegistered = true
+                else
+                    if self.app and self.app.logger then self.app.logger:error("ChainTestScene require failed") end
+                    return
+                end
+            end
+            self.app:switchScene("chain-test")
+        end
+        return
+    end
+    if key == "f7" then
+        if self.app and self.app.logger then self.app.logger:info("Switch to color-test scene") end
+        if self.app and self.app.scenes then
+            -- 懒注册：仅首次按下时注册
+            if not self._colorTestRegistered then
+                local ok, SceneMod = pcall(require, "Game.Scenes.ColorTestScene")
+                if ok and SceneMod then
+                    self.app.scenes:register("color-test", SceneMod(self.app))
+                    self._colorTestRegistered = true
+                else
+                    if self.app and self.app.logger then self.app.logger:error("ColorTestScene require failed") end
+                    return
+                end
+            end
+            self.app:switchScene("color-test")
         end
         return
     end

@@ -11,18 +11,24 @@ local VecAnimTestScene = Scene:extend()
 function VecAnimTestScene:enter()
     if self.app and self.app.logger then self.app.logger:info("VecAnimTest enter") end
 
-    -- 文本说明
-    self.title = Label("Vec + Animation Test", 12, 10, {1,1,0.6,1})
+    -- 文本说明（使用链式调用）
+    self.title = Label()
+        :setText("Vec + Animation Test")
+        :setPosition(12, 10)
+        :setColor(1, 1, 0.6, 1)
 
     -- 中心与半径
     local ww, wh = love.graphics.getDimensions()
     self.center = Vector2(ww * 0.5, wh * 0.5)
     self.radius = 90
 
-    -- 被动画驱动的面板（中心锚点）
-    self.mover = Panel(0, 0, 120, 32)
-    self.mover:setPivotCenter()
-    self.moverLabel = Label("moving", 8, 8)
+    -- 被动画驱动的面板（中心锚点，使用链式调用）
+    self.mover = Panel()
+        :setSize(120, 32)
+        :setPivotCenter()
+    self.moverLabel = Label()
+        :setText("moving")
+        :setPosition(8, 8)
     self.mover:add(self.moverLabel)
 
     -- 初始化角度与位置
@@ -54,8 +60,11 @@ function VecAnimTestScene:enter()
     local c = Vector2(10,0):clampLength(3)
     log(string.format("clampLength((10,0),3)=(%.2f,%.2f), len=%.2f", c.x, c.y, c:length()))
 
-    -- 热键提示
-    self.hint = Label("[F5] back to Main  |  [P] pause  [R] resume", 12, 30, {0.8,0.9,1,1})
+    -- 热键提示（使用链式调用）
+    self.hint = Label()
+        :setText("[F5] back to Main  |  [P] pause  [R] resume")
+        :setPosition(12, 30)
+        :setColor(0.8, 0.9, 1, 1)
 end
 
 function VecAnimTestScene:keypressed(key)

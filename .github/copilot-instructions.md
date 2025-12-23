@@ -22,6 +22,7 @@ This repository is a Lua/LÖVE 2D "idle/text" game framework. Focus on these pro
 
 ## Conventions & Patterns
 - OOP: Base class utilities in [Engine/Object.lua](../Engine/Object.lua); use `Class:extend()` + `new()`; `is()` for runtime type checks. Classes also support `__call` sugar, so `Class(...)` equals `Class:new(...)`. Prefer `Class(...)` for consistency.
+- Getter/Setter: Define via direct assignment to `__getter` and `__setter` tables. Example: `Node.__getter.x = function(self) return self.pos.x end`. Getters can return `value, needCache` to cache results. Setters return processed value or `nil`. See [Engine/Node.lua](../Engine/Node.lua) for reference implementation.
 - Scene lifecycle: Implement `enter/leave/update/draw`. Clean up event listeners in `leave()` via `app:off(event, handler)`.
 - Scene switching: The manager pauses the old scene target and resumes the new one in `SceneManager:switch()`. Ensure scene listeners use `target=self` to benefit from this.
 - Event bus: Use `app:on(event, fn)`, `app:once(event, fn)`, `app:emit(event, ...)`. Common events: `input:keypressed`, `input:keyreleased`, `input:text`, `input:mousepressed`, `input:mousereleased`, `input:mousemoved`, `input:wheelmoved`.

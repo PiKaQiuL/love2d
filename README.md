@@ -11,18 +11,55 @@
 - Engine/Storage.lua：简易存档（save/load）
 - Engine/App.lua：应用总控（聚合事件/计时/场景/系统）
  - Engine/Node.lua：节点基类（位置/缩放/旋转、子节点与绘制传递）
- - Engine/UI/Label.lua：文本标签
- - Engine/UI/Panel.lua：面板背景与边框容器
- - Engine/UI/Button.lua：可点击按钮（支持 hover/pressed/disabled）
- - Engine/UI/TextInput.lua：文本输入框（点击聚焦、键盘输入）
- - Engine/UI/ListView.lua：简单列表视图（选择项回调）
+ - Engine/UI/Label.lua：文本标签（支持链式调用）
+ - Engine/UI/Panel.lua：面板背景与边框容器（支持链式调用）
+ - Engine/UI/Button.lua：可点击按钮（支持 hover/pressed/disabled，支持链式调用）
+ - Engine/UI/TextInput.lua：文本输入框（点击聚焦、键盘输入，支持链式调用）
+ - Engine/UI/ListView.lua：简单列表视图（选择项回调，支持链式调用）
+ - Engine/UI/ProgressBar.lua：进度条组件（支持链式调用）
  - Engine/Input.lua：输入系统（键盘/鼠标状态查询与事件聚合）
  - Engine/Trigger.lua：触发系统（条件/阈值触发、一次性/冷却、事件广播）
- - Engine/UI/Layout.lua：布局容器（垂直/水平堆叠、间距、内边距、对齐）
+ - Engine/UI/Layout.lua：布局容器（垂直/水平堆叠、间距、内边距、对齐，支持链式调用）
  - Engine/UI/Style.lua：主题与样式（统一控件配色与风格）
  - Engine/UI/Defaults.lua：UI 默认样式集中定义
  - Engine/Config.lua：项目配置（如 FPS、默认 UI 间距/内边距）
  - Engine/Enums.lua：枚举集中管理（按钮状态/布局方向与对齐/鼠标键）
+
+## 最新更新
+
+### Setter 函数泛型约束实现（2025-12-23）
+
+✨ **新增：** 所有 setter 方法现在支持**泛型约束**，实现继承链中的完整类型推断：
+
+```lua
+-- 类型自动推断和保持
+local label = Label()
+    :setText("Hello")        -- 返回 Label（而不是 Widget）
+    :setColor(1, 1, 1, 1)    -- 返回 Label
+    :setPosition(10, 10)     -- 继承自 Node，但返回 Label
+    :setSize(100, 30)        -- 继承自 Widget，但返回 Label
+
+local button = Button()
+    :setText("Click")        -- 返回 Button
+    :setSize(120, 30)        -- 返回 Button（Widget 方法）
+    :setPosition(10, 10)     -- 返回 Button（Node 方法）
+    :setPivotCenter()        -- 返回 Button（Node 方法）
+```
+
+这意味着：
+- ✅ **完整的类型推断** - IDE 自动补全更准确
+- ✅ **类型安全的链式调用** - LuaLS 能检测类型错误
+- ✅ **深层继承支持** - 即使继承多层也能保持类型
+
+详细文档：
+- [Docs/Generic-Chaining-Summary.md](Docs/Generic-Chaining-Summary.md) - 完成总结
+- [Docs/Generic-Chaining-Implementation.md](Docs/Generic-Chaining-Implementation.md) - 详细技术说明
+- [Docs/Setter-Generic-Quick-Ref.md](Docs/Setter-Generic-Quick-Ref.md) - 快速参考
+- [test_generic_chaining.lua](test_generic_chaining.lua) - 10 个详细演示示例
+
+### UI 组件链式调用支持
+
+所有 UI 组件统一支持无参数初始化 + 链式调用配置，让 UI 开发更加流畅。详见 [Docs/UI-Chain-Calling.md](Docs/UI-Chain-Calling.md)。
 
 ## 项目结构
 

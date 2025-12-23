@@ -11,7 +11,6 @@
 local Node = require("Engine.Core.Node")
 local Enums = require("Engine.Core.Enums")
 
----
 ---@class Layout : Node
 ---@field direction string
 ---@field spacing number
@@ -33,48 +32,41 @@ local Enums = require("Engine.Core.Enums")
 ---@field border number[]|nil
 ---@field borderWidth number
 ---@field _layout table<any, { margin: { l: number, t: number, r: number, b: number } }>
+---@overload fun(...):self
 local Layout = Node:extend()
 
--- opts: { direction = "vertical"|"horizontal", spacing = number, padding = number|{l,t,r,b}, align = "start"|"center"|"end", bg = {r,g,b,a}, border = {r,g,b,a}, borderWidth = number }
----
----@param x number
----@param y number
----@param w number
----@param h number
----@param opts table|nil
-function Layout:init(x, y, w, h, opts)
-    opts = opts or {}
-    Node.init(self, x or 0, y or 0)
-    self.direction = opts.direction or Enums.LayoutDirection.vertical
-    self.spacing = opts.spacing or 6
-    self.gapX = opts.gapX or self.spacing
-    self.gapY = opts.gapY or self.spacing
-    self.padding = opts.padding or 6
-    if type(self.padding) ~= "table" then
-        self.padL, self.padT, self.padR, self.padB = self.padding, self.padding, self.padding, self.padding
-    else
-        self.padL = self.padding.l or 0
-        self.padT = self.padding.t or 0
-        self.padR = self.padding.r or 0
-        self.padB = self.padding.b or 0
-    end
-    self.align = opts.align or Enums.Align.start -- cross-axis alignment
-    self.justify = opts.justify or Enums.Align.start -- main-axis distribution: start|center|end|space-between
-    self.w = w or 300
-    self.h = h or 200
-    self.bg = opts.bg
-    self.border = opts.border
-    self.borderWidth = opts.borderWidth or 1
-    self.wrap = opts.wrap or false
-    self.clip = opts.clip or false
-    self.autoSize = opts.autoSize or false
+
+function Layout:init()
+    Node.init(self)
+    self.direction = Enums.LayoutDirection.vertical
+    self.spacing = 6
+    self.gapX = 6
+    self.gapY = 6
+    self.padding = 6
+    self.padL = 6
+    self.padT = 6
+    self.padR = 6
+    self.padB = 6
+    self.align = Enums.Align.start -- cross-axis alignment
+    self.justify = Enums.Align.start -- main-axis distribution: start|center|end|space-between
+    self.w = 300
+    self.h = 200
+    self.bg = nil
+    self.border = nil
+    self.borderWidth = 1
+    self.wrap = false
+    self.clip = false
+    self.autoSize = false
 
     -- 存储子项的布局选项（如 margin）
     self._layout = {}
 end
 
 --- 设置方向
----@param dir string 方向（vertical|horizontal）
+---@generic T : Layout
+---
+---@param dir string @方向（vertical|horizontal）
+---@return T
 function Layout:setDirection(dir)
     self.direction = dir or self.direction
     self:relayout()
@@ -82,7 +74,9 @@ function Layout:setDirection(dir)
 end
 
 --- 设置子项间距
----@param s number 间距
+---@generic T : Layout
+---
+---@param s number @间距
 function Layout:setSpacing(s)
     self.spacing = s or self.spacing
     self.gapX = self.gapX or self.spacing
@@ -92,7 +86,9 @@ function Layout:setSpacing(s)
 end
 
 --- 设置内边距
----@param p number|table 统一值或 {l,t,r,b}
+---@generic T : Layout
+---
+---@param p number|table @统一值或 {l,t,r,b}
 function Layout:setPadding(p)
     self.padding = p or self.padding
     if type(self.padding) ~= "table" then
@@ -108,7 +104,9 @@ function Layout:setPadding(p)
 end
 
 --- 设置对齐方式
----@param a string 对齐（start|center|end）
+---@generic T : Layout
+---
+---@param a string @对齐（start|center|end）
 function Layout:setAlign(a)
     self.align = a or self.align
     self:relayout()
@@ -116,6 +114,8 @@ function Layout:setAlign(a)
 end
 
 --- 设置主轴分布
+---@generic T : Layout
+---
 ---@param j string
 function Layout:setJustify(j)
     self.justify = j or self.justify
@@ -124,6 +124,8 @@ function Layout:setJustify(j)
 end
 
 --- 设置是否换行
+---@generic T : Layout
+---
 ---@param wrap boolean
 function Layout:setWrap(wrap)
     self.wrap = not not wrap
@@ -131,7 +133,9 @@ function Layout:setWrap(wrap)
     return self
 end
 
---- 设置剪裁
+--- 设置剂裁
+---@generic T : Layout
+---
 ---@param clip boolean
 function Layout:setClip(clip)
     self.clip = not not clip
@@ -139,6 +143,8 @@ function Layout:setClip(clip)
 end
 
 --- 设置双轴间距
+---@generic T : Layout
+---
 ---@param gx number|nil
 ---@param gy number|nil
 function Layout:setGaps(gx, gy)
@@ -149,6 +155,8 @@ function Layout:setGaps(gx, gy)
 end
 
 --- 设置自动尺寸
+---@generic T : Layout
+---
 ---@param v boolean
 function Layout:setAutoSize(v)
     self.autoSize = not not v
@@ -157,8 +165,10 @@ function Layout:setAutoSize(v)
 end
 
 --- 设置容器尺寸
----@param w number 宽度
----@param h number 高度
+---@generic T : Layout
+---
+---@param w number @宽度
+---@param h number @高度
 function Layout:setSize(w, h)
     self.w, self.h = w or self.w, h or self.h
     self:relayout()

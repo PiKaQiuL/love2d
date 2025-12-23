@@ -2,18 +2,18 @@
 --- 按钮控件：支持鼠标与键盘激活、焦点与状态描边
 -- 模块：按钮控件
 -- 功能：点击与键盘激活，支持 hover/pressed/disabled/focus 状态
--- 依赖：Engine.Node, Engine.UI.Label, Engine.Enums, Engine.UI.Defaults
+-- 依赖：Engine.Node, Engine.UI.Label, Engine.Enums, Engine.UI.Defaults, Engine.Utils.ColorHelper
 -- 作者：Team
--- 修改时间：2025-12-21
+-- 修改时间：2025-12-23
 --
 -- 性能提示：按钮绘制为简单矩形，适合文本 UI；若大量按钮同时存在，尽量减少每帧状态重计算和多次 setLineWidth 调用。
 local Widget = require("Engine.UI.Widget")
 local Label = require("Engine.UI.Label")
 local Enums = require("Engine.Core.Enums")
 local Defaults = require("Engine.UI.Defaults")
+local ColorHelper = require("Engine.Utils.ColorHelper")
 
---- 按钮状态别名（与 Enums.ButtonState 一致），本地别名避免与全局重复
----@alias UIButtonState "normal"|"hover"|"pressed"|"disabled"
+
 ---@class ButtonColors
 ---@field normal Color
 ---@field hover Color
@@ -42,42 +42,118 @@ local Defaults = require("Engine.UI.Defaults")
 ---@field colors ButtonColors         颜色集
 ---@field borderWidth number          边框宽度
 ---@field label Label                 文本标签
+---@overload fun(...):self
 local Button = Widget:extend()
 
 
----
----@param text string|nil
----@param x number|nil
----@param y number|nil
----@param w number|nil
----@param h number|nil
----@param opts ButtonOptions|nil
-function Button:init(text, x, y, w, h, opts)
-    opts = opts or {}
-    local bw = w or 120
-    local bh = h or 30
-    Widget.init(self, x or 0, y or 0, bw, bh, opts)
-    self.w = bw
-    self.h = bh
-    self.text = tostring(text or "Button")
+
+function Button:init()
+    Widget.init(self)
+    self.w = 120
+    self.h = 30
+    self.text = "Button"
     self.state = Enums.ButtonState.normal
-    self.disabled = opts.disabled or false
-    self.focused = opts.focused or false
-    self.onClick = opts.onClick
-    self.colors = opts.colors or Defaults.buttonColors
-    self.borderWidth = opts.borderWidth or 1
-    self.label = Label(self.text, 0, 0, self.colors.text)
-    self.label:setPosition(8, (self.h - 14) / 2)
+    self.disabled = false
+    self.focused = false
+    self.onClick = nil
+    self.colors = Defaults.buttonColors
+    self.borderWidth = 1
+    self.label = Label()
+        :setText(self.text)
+        :setColor(self.colors.text)
+        :setPosition(8, (self.h - 14) / 2)
+        :setVisible(false)
+    
     self:add(self.label)
 end
 
-
 ---
+---@generic T : Button
+---@param self T
 ---@param d boolean|nil
----@return Button
+---@return T
 function Button:setDisabled(d)
     self.disabled = not not d
     self.state = self.disabled and Enums.ButtonState.disabled or Enums.ButtonState.normal
+    return self
+end
+
+--- 设置按预文本
+---@generic T : Button
+---@param self T
+---@param text string
+---@return T
+function Button:setText(text)
+    ---@cast self Button
+    self.text = tostring(text or "")
+    if self.label then
+        self.label:setText(self.text)
+        self.label:setVisible(true)
+    end
+    return self
+end
+
+--- 设置按预文本颜色（支持多种格式）
+---@generic T : Button
+---@param self T
+---@param color number|table|Color @颜色对象、颜色数组或红色分量
+---@param g number|nil @绿色分量
+---@param b number|nil @蓝色分量
+---@param a number|nil @透明度
+---@return T
+function Button:setTextColor(color, g, b, a)
+    ---@cast self Button
+    if self.label then
+        self.label:setColor(color, g, b, a)
+    end
+    return self
+end
+
+--- 设置按预尺寸
+---@generic T : Button
+---@param self T
+---@param w number|nil
+---@param h number|nil
+---@return T
+function Button:setSize(w, h)
+    ---@cast self Button
+    self.w = w or self.w
+    self.h = h or self.h
+    if self.label then
+        self.label:setPosition(8, (self.h - 14) / 2)
+    end
+    return self
+end
+
+--- 设置按预颜色集
+---@generic T : Button
+---@param self T
+---@param colors ButtonColors
+---@return T
+function Button:setColors(colors)
+    if colors then
+        self.colors = colors
+    end
+    return self
+end
+
+--- 设置边框宽度
+---@generic T : Button
+---@param self T
+---@param width number
+---@return T
+function Button:setBorderWidth(width)
+    self.borderWidth = width or 1
+    return self
+end
+
+--- 设置点击回调
+---@generic T : Button
+---@param self T
+---@param callback fun(self: Button)|nil
+---@return T
+function Button:setOnClick(callback)
+    self.onClick = callback
     return self
 end
 
@@ -86,17 +162,17 @@ end
 ---@param y number
 function Button:render(x, y)
     local c = self.colors[self.state] or self.colors[Enums.ButtonState.normal]
-    love.graphics.setColor(c)
+    ColorHelper.apply(c)
     love.graphics.rectangle("fill", x, y, self.w, self.h, 4, 4)
     love.graphics.setLineWidth(self.borderWidth)
-    love.graphics.setColor(self.colors.border)
+    ColorHelper.apply(self.colors.border)
     love.graphics.rectangle("line", x, y, self.w, self.h, 4, 4)
     if self.focused and not self.disabled then
-        love.graphics.setColor(self.colors.focus)
+        ColorHelper.apply(self.colors.focus)
         love.graphics.setLineWidth(self.borderWidth + 1)
         love.graphics.rectangle("line", x + 2, y + 2, self.w - 4, self.h - 4, 4, 4)
     end
-    love.graphics.setColor(1,1,1,1)
+    love.graphics.setColor(1, 1, 1, 1)
 end
 
 ---@param mx number

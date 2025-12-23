@@ -1,48 +1,55 @@
 -- Engine/UI/Label.lua
+-- 文本标签控件：支持 Color 对象和向后兼容的颜色格式
+-- 模块：UI 标签
+-- 功能：显示文本，支持自定义字体和颜色
+-- 依赖：Engine.UI.Widget, Engine.UI.Defaults, Engine.Utils.ColorHelper
+-- 作者：Team
+-- 修改时间：2025-12-23
+
 local Widget = require("Engine.UI.Widget")
 local Defaults = require("Engine.UI.Defaults")
+local ColorHelper = require("Engine.Utils.ColorHelper")
 
----
 ---@class Label : Widget
 ---@field text string
 ---@field color Color
 ---@field font love.Font|nil
+---@overload fun(...):self
 local Label = Widget:extend()
 
----
----@param text string|nil
----@param x number|nil
----@param y number|nil
----@param color Color|nil
-function Label:init(text, x, y, color)
-    Widget.init(self, x or 0, y or 0, 0, 0)
-    self.text = tostring(text or "")
-    self.color = color or Defaults.textColor
+function Label:init()
+    Widget.init(self)
+    self.text = ""
+    self.color = Defaults.textColor
     self.font = nil
 end
 
----
+---@generic T : Label
+---@param self T
 ---@param t string|nil
----@return Label
+---@return T
 function Label:setText(t)
     self.text = tostring(t or "")
     return self
 end
 
----
----@param r number|nil
----@param g number|nil
----@param b number|nil
----@param a number|nil
----@return Label
+--- 设置颜色（支持多种格式）
+---@generic T : Label
+---@param self T
+---@param r number|table|Color|nil @红色分量、颜色对象或颜色数组
+---@param g number|nil @绿色分量
+---@param b number|nil @蓝色分量
+---@param a number|nil @透明度
+---@return T
 function Label:setColor(r, g, b, a)
-    self.color = { r or 1, g or 1, b or 1, a or 1 }
+    self.color = ColorHelper.toColor(r, g, b, a)
     return self
 end
 
----
+---@generic T : Label
+---@param self T
 ---@param font love.Font
----@return Label
+---@return T
 function Label:setFont(font)
     self.font = font
     return self
@@ -54,7 +61,7 @@ end
 function Label:render(x, y)
     local prevFont = love.graphics.getFont()
     if self.font then love.graphics.setFont(self.font) end
-    love.graphics.setColor(self.color)
+    ColorHelper.apply(self.color)
     love.graphics.print(self.text, x, y)
     love.graphics.setColor(1, 1, 1, 1)
     if self.font then love.graphics.setFont(prevFont) end

@@ -2,13 +2,15 @@
 -- 主题与样式：为控件应用统一风格
 -- 模块：主题与样式
 -- 功能：集中维护控件配色，批量应用到节点树
--- 依赖：Engine.Object, Engine.UI.Button, Engine.UI.Panel, Engine.UI.Label, Engine.UI.TextInput, Engine.UI.ListView
+-- 依赖：Engine.Object, Engine.UI.*, Engine.Utils.Color, Engine.Utils.ColorHelper
 -- 作者：Team
--- 修改时间：2025-12-21
+-- 修改时间：2025-12-23
 --
 -- 性能提示：applyTree 会遍历整棵节点树；在控件大量变更时考虑只对变化部分应用或延后统一应用。
 
 local Object = require("Engine.Core.Object")
+local Color = require("Engine.Utils.Color")
+local ColorHelper = require("Engine.Utils.ColorHelper")
 local Button = require("Engine.UI.Button")
 local Panel = require("Engine.UI.Panel")
 local Label = require("Engine.UI.Label")
@@ -70,39 +72,43 @@ local Style = Object:extend()
 ---@param theme Theme|nil
 function Style:init(theme)
     self.theme = theme or {
-        panel = { bg = {0.1,0.1,0.12,0.9}, border = {1,1,1,0.8}, borderWidth = 1 },
-        text = { color = {1,1,1,1} },
+        panel = { 
+            bg = Color(0.1,0.1,0.12,0.9), 
+            border = Color.WHITE:clone():setAlpha(0.8), 
+            borderWidth = 1 
+        },
+        text = { color = Color.WHITE },
         button = {
-            normal = {0.18,0.18,0.22,1},
-            hover = {0.22,0.22,0.26,1},
-            pressed = {0.12,0.12,0.16,1},
-            disabled = {0.1,0.1,0.1,0.6},
-            border = {1,1,1,0.9},
-            text = {1,1,1,1},
-            focus = {0.9,0.9,0.3,1}
+            normal = Color(0.18,0.18,0.22,1),
+            hover = Color(0.22,0.22,0.26,1),
+            pressed = Color(0.12,0.12,0.16,1),
+            disabled = Color(0.1,0.1,0.1,0.6),
+            border = Color.WHITE:clone():setAlpha(0.9),
+            text = Color.WHITE,
+            focus = Color(0.9,0.9,0.3,1)
         },
         input = {
-            bg = {0.1,0.1,0.1,1},
-            border = {1,1,1,0.9},
-            text = {1,1,1,1},
-            placeholder = {0.7,0.7,0.7,0.7}
+            bg = Color(0.1,0.1,0.1,1),
+            border = Color.WHITE:clone():setAlpha(0.9),
+            text = Color.WHITE,
+            placeholder = Color(0.7,0.7,0.7,0.7)
         },
         list = {
-            bg = {0.08,0.08,0.08,1},
-            border = {1,1,1,0.9},
-            text = {1,1,1,1},
-            hover = {0.2,0.2,0.2,0.8},
-            selected = {0.2,0.4,0.2,0.8}
+            bg = Color(0.08,0.08,0.08,1),
+            border = Color.WHITE:clone():setAlpha(0.9),
+            text = Color.WHITE,
+            hover = Color(0.2,0.2,0.2,0.8),
+            selected = Color(0.2,0.4,0.2,0.8)
         },
         layout = {
             bg = nil,
-            border = {1,1,1,0.3},
+            border = Color.WHITE:clone():setAlpha(0.3),
             borderWidth = 1
         },
         progress = {
-            bg = {0.08,0.08,0.08,1},
-            fill = {0.6,0.8,1.0,0.9},
-            border = {1,1,1,0.3}
+            bg = Color(0.08,0.08,0.08,1),
+            fill = Color(0.6,0.8,1.0,0.9),
+            border = Color.WHITE:clone():setAlpha(0.3)
         }
     }
 end

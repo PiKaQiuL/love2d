@@ -14,7 +14,8 @@ local Defaults = require("Engine.UI.Defaults")
 ---@field placeholder string|nil
 ---@field colors TextInputColors|nil
 
----
+
+
 ---@class TextInput : Widget
 ---@field w number
 ---@field h number
@@ -23,32 +24,28 @@ local Defaults = require("Engine.UI.Defaults")
 ---@field focused boolean
 ---@field placeholder string
 ---@field colors TextInputColors
+---@overload fun(...):self
 local TextInput = Widget:extend()
 
----
----@param x number|nil
----@param y number|nil
----@param w number|nil
----@param h number|nil
----@param opts TextInputOptions|nil
-function TextInput:init(x, y, w, h, opts)
-    opts = opts or {}
-    local tw = w or 180
-    local th = h or 28
-    Widget.init(self, x or 0, y or 0, tw, th, opts)
-    self.w = tw
-    self.h = th
+
+function TextInput:init()
+    Widget.init(self)
+    self.w = 180
+    self.h = 28
     self.text = ""
     self.caret = 0
     self.focused = false
-    self.placeholder = opts.placeholder or ""
-    self.colors = opts.colors or Defaults.inputColors
+    self.placeholder = ""
+    self.colors = Defaults.inputColors
 end
 
 ---
+---@generic T : TextInput
+---@param self T
 ---@param t string|nil
----@return TextInput
+---@return T
 function TextInput:setText(t)
+    ---@cast self TextInput
     self.text = tostring(t or "")
     self.caret = #self.text
     return self
@@ -58,6 +55,50 @@ end
 ---@return string
 function TextInput:getText()
     return self.text
+end
+
+--- 设置占位符文本
+---@generic T : TextInput
+---@param self T
+---@param placeholder string
+---@return T
+function TextInput:setPlaceholder(placeholder)
+    self.placeholder = tostring(placeholder or "")
+    return self
+end
+
+--- 设置输入框颜色集
+---@generic T : TextInput
+---@param self T
+---@param colors TextInputColors
+---@return T
+function TextInput:setColors(colors)
+    if colors then
+        self.colors = colors
+    end
+    return self
+end
+
+--- 设置输入框尺寸
+---@generic T : TextInput
+---@param self T
+---@param w number|nil
+---@param h number|nil
+---@return T
+function TextInput:setSize(w, h)
+    self.w = w or self.w
+    self.h = h or self.h
+    return self
+end
+
+--- 设置聚焦状态
+---@generic T : TextInput
+---@param self T
+---@param focused boolean
+---@return T
+function TextInput:setFocused(focused)
+    self.focused = not not focused
+    return self
 end
 
 ---

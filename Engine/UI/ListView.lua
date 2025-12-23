@@ -2,8 +2,8 @@
 local Widget = require("Engine.UI.Widget")
 local Defaults = require("Engine.UI.Defaults")
 
----
 ---@class ListView : Widget
+---@overload fun(...):self
 ---@field w number
 ---@field itemHeight number
 ---@field items string[]
@@ -17,24 +17,16 @@ local Defaults = require("Engine.UI.Defaults")
 ---@field _drag { active: boolean, grabOffset: number, trackY: number, trackH: number, thumbH: number }
 local ListView = Widget:extend()
 
----
----@param x number
----@param y number
----@param w number
----@param itemHeight number
----@param opts table|nil
-function ListView:init(x, y, w, itemHeight, opts)
-    opts = opts or {}
-    local lw = w or 240
-    Widget.init(self, x or 0, y or 0, lw, 0, opts)
-    self.w = lw
-    self.itemHeight = itemHeight or 18
+function ListView:init()
+    Widget.init(self)
+    self.w = 240
+    self.itemHeight = 18
     self.items = {}
     self.selected = nil
-    self.onSelect = opts.onSelect
-    self.maxVisible = opts.maxVisible or 10
-    self.padding = opts.padding or 4
-    self.colors = opts.colors or Defaults.listColors
+    self.onSelect = nil
+    self.maxVisible = 10
+    self.padding = 4
+    self.colors = Defaults.listColors
     self.hoverIndex = nil
     self.scrollY = 0
     self._drag = { active = false, grabOffset = 0, trackY = 0, trackH = 0, thumbH = 0 }
@@ -86,30 +78,94 @@ local function clamp(v, minv, maxv)
     return v
 end
 
+---@generic T : ListView
+---
 ---@param y number|nil
+---@return T
 function ListView:setScroll(y)
     local maxScroll = self:getScrollMax()
     self.scrollY = clamp(y or 0, 0, maxScroll)
     return self
 end
 
+---@generic T : ListView
+---
 ---@param dy number|nil
+---@return T
 function ListView:scrollBy(dy)
     self:setScroll((self.scrollY or 0) + (dy or 0))
     return self
 end
 
 ---
+---@generic T : ListView
+---
 ---@param item string|number
+---@return T
 function ListView:add(item)
     self.items[#self.items + 1] = tostring(item)
     return self
 end
 
+---@generic T : ListView
+---
+---@return T
 function ListView:clear()
     self.items = {}
     self.selected = nil
     self.hoverIndex = nil
+    return self
+end
+
+--- 设置选中回调
+---@generic T : ListView
+---
+---@param callback fun(self:ListView, index:integer, value:string)|nil
+---@return T
+function ListView:setOnSelect(callback)
+    self.onSelect = callback
+    return self
+end
+
+--- 设置颜色集
+---@generic T : ListView
+---
+---@param colors table
+---@return T
+function ListView:setColors(colors)
+    if colors then
+        self.colors = colors
+    end
+    return self
+end
+
+--- 设置最大可见项数
+---@generic T : ListView
+---
+---@param maxVisible integer
+---@return T
+function ListView:setMaxVisible(maxVisible)
+    self.maxVisible = maxVisible or 10
+    return self
+end
+
+--- 设置列表项高度
+---@generic T : ListView
+---
+---@param height number
+---@return T
+function ListView:setItemHeight(height)
+    self.itemHeight = height or 18
+    return self
+end
+
+--- 设置列表宽度
+---@generic T : ListView
+---
+---@param w number
+---@return T
+function ListView:setWidth(w)
+    self.w = w or self.w
     return self
 end
 

@@ -1,5 +1,5 @@
 -- Engine/UI/Widget.lua
--- 通用控件基类：统一绘制/命中测试/可见性/启用/缩放等
+-- 通用控件基类:统一绘制/命中测试/可见性/启用/缩放等
 
 local Node = require("Engine.Core.Node")
 
@@ -11,44 +11,46 @@ local Node = require("Engine.Core.Node")
 ---@field render fun(self:Widget, x:number, y:number)|nil
 ---@field preRender fun(self:Widget, x:number, y:number)|nil
 ---@field postRender fun(self:Widget, x:number, y:number)|nil
+---@overload fun(...):Widget
 local Widget = Node:extend()
 
----
----@param x number|nil
----@param y number|nil
----@param w number|nil
----@param h number|nil
----@param opts table|nil @{ enabled:boolean|nil, opacity:number|nil }
-function Widget:init(x, y, w, h, opts)
-    opts = opts or {}
-    Node.init(self, x or 0, y or 0)
-    self.w = w or 0
-    self.h = h or 0
-    self.enabled = opts.enabled ~= false
-    self.opacity = opts.opacity or 1
+function Widget:init()
+    Node.init(self)
+    self.w = 0
+    self.h = 0
+    self.enabled = true
+    self.opacity = 1
 end
 
 --- 设置组件尺寸
+---@generic T : Widget
+---
 ---@param w number|nil
 ---@param h number|nil
----@return Widget
+---@return T
 function Widget:setSize(w, h)
     self.w, self.h = w or self.w, h or self.h
     return self
 end
 
 --- 使用向量设置尺寸（便捷）
+---@generic T : Widget
+---
 ---@param v { x:number, y:number }
----@return Widget
+---@return T
 function Widget:setSizeV(v)
-    if v then self.w = v.x or self.w; self.h = v.y or self.h end
+    if v then
+        self.w = v.x or self.w; self.h = v.y or self.h
+    end
     return self
 end
 
 --- 设置组件缩放
+---@generic T : Widget
+---
 ---@param sx number|nil
 ---@param sy number|nil
----@return Widget
+---@return T
 function Widget:setScale(sx, sy)
     self.sx = sx or self.sx or 1
     self.sy = sy or self.sy or 1
@@ -56,16 +58,20 @@ function Widget:setScale(sx, sy)
 end
 
 --- 设置组件可见性
+---@generic T
+---@param self T
 ---@param v boolean
----@return Widget
+---@return T
 function Widget:setVisible(v)
     self.visible = not not v
     return self
 end
 
 --- 设置组件启用状态
+---@generic T : Widget
+---@param self T
 ---@param e boolean
----@return Widget
+---@return T
 function Widget:setEnabled(e)
     self.enabled = not not e
     return self
@@ -89,11 +95,13 @@ function Widget:animate(animOrApp, keyOrSetter, to, duration, easing, opts)
 end
 
 --- 批量动画到多个目标属性
+---@generic T : Widget
+---@param self T
 ---@param animOrApp Animation|App @Animation 系统实例或 App
 ---@param props table<string, number> @属性名到目标值映射
 ---@param duration number
 ---@param easing string|fun(t:number):number|nil
----@return Widget
+---@return T
 function Widget:animateTo(animOrApp, props, duration, easing)
     local anim = animOrApp
     if anim and anim.animation then anim = anim.animation end
@@ -103,9 +111,11 @@ function Widget:animateTo(animOrApp, props, duration, easing)
 end
 
 --- 停止当前组件的动画
+---@generic T : Widget
+---@param self T
 ---@param animOrApp Animation|App @Animation 系统实例或 App
 ---@param key string|nil @可选：仅停止指定属性的轨道
----@return Widget
+---@return T
 function Widget:stopAnimations(animOrApp, key)
     local anim = animOrApp
     if anim and anim.animation then anim = anim.animation end
@@ -115,9 +125,11 @@ function Widget:stopAnimations(animOrApp, key)
 end
 
 --- 暂停当前组件的动画
+---@generic T : Widget
+---@param self T
 ---@param animOrApp Animation|App @Animation 系统实例或 App
 ---@param key string|nil @可选：仅暂停指定属性的轨道
----@return Widget
+---@return T
 function Widget:pauseAnimations(animOrApp, key)
     local anim = animOrApp
     if anim and anim.animation then anim = anim.animation end
@@ -127,9 +139,11 @@ function Widget:pauseAnimations(animOrApp, key)
 end
 
 --- 恢复当前组件的动画
+---@generic T : Widget
+---@param self T
 ---@param animOrApp Animation|App @Animation 系统实例或 App
 ---@param key string|nil @可选：仅恢复指定属性的轨道
----@return Widget
+---@return T
 function Widget:resumeAnimations(animOrApp, key)
     local anim = animOrApp
     if anim and anim.animation then anim = anim.animation end

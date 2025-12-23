@@ -10,23 +10,25 @@ local Defaults = require("Engine.UI.Defaults")
 ---@field max number
 ---@field colors { bg: number[], fill: number[], border: number[] }
 ---@field borderWidth number
+---@overload fun(...):ProgressBar
 local ProgressBar = Widget:extend()
 
----@param x number|nil
----@param y number|nil
----@param w number|nil
----@param h number|nil
----@param opts table|nil @{ value:number|nil, min:number|nil, max:number|nil, colors:table|nil, borderWidth:number|nil }
-function ProgressBar:init(x, y, w, h, opts)
-    opts = opts or {}
-    Widget.init(self, x or 0, y or 0, w or 160, h or 12, opts)
-    self.min = opts.min or 0
-    self.max = opts.max or 1
-    self.value = math.max(self.min, math.min(opts.value or 0, self.max))
-    self.colors = opts.colors or Defaults.progressColors
-    self.borderWidth = opts.borderWidth or 1
+function ProgressBar:init()
+    Widget.init(self)
+    self.w = 160
+    self.h = 12
+    self.min = 0
+    self.max = 1
+    self.value = 0
+    self.colors = Defaults.progressColors
+    self.borderWidth = 1
 end
 
+---@generic T : ProgressBar
+---@param self T
+---@param min number|nil
+---@param max number|nil
+---@return T
 function ProgressBar:setRange(min, max)
     if min ~= nil then self.min = min end
     if max ~= nil then self.max = max end
@@ -35,7 +37,12 @@ function ProgressBar:setRange(min, max)
     return self
 end
 
+---@generic T : ProgressBar
+---@param self T    
+---@param v number
+---@return T
 function ProgressBar:setValue(v)
+    ---@cast self ProgressBar
     v = tonumber(v) or self.value
     if v < self.min then v = self.min end
     if v > self.max then v = self.max end
@@ -43,12 +50,40 @@ function ProgressBar:setValue(v)
     return self
 end
 
+---@return number
 function ProgressBar:getValue()
     return self.value
 end
 
+---@generic T : ProgressBar
+---@param self T
+---@param colors table
+---@return T
 function ProgressBar:setColors(colors)
+    ---@cast self ProgressBar
     if colors then self.colors = colors end
+    return self
+end
+
+--- 设置进度条尺寸
+---@generic T : ProgressBar
+---@param self T
+---@param w number|nil
+---@param h number|nil
+---@return T
+function ProgressBar:setSize(w, h)
+    self.w = w or self.w
+    self.h = h or self.h
+    return self
+end
+
+--- 设置边框宽度
+---@generic T : ProgressBar
+---@param self T
+---@param width number
+---@return T
+function ProgressBar:setBorderWidth(width)
+    self.borderWidth = width or 1
     return self
 end
 
