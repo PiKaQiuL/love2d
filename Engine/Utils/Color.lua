@@ -102,6 +102,7 @@ end
 ---@param self T
 ---@return T
 function Color:clone()
+    ---@cast self Color
     return Color(self.r, self.g, self.b, self.a)
 end
 
