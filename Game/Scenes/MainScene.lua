@@ -9,6 +9,7 @@ local Label = require("Engine.UI.Label")
 local ListView = require("Engine.UI.ListView")
 local Input = require("Engine.Systems.Input")
 local Vector2 = require("Engine.Utils.Vector2")
+local Behavior = require("Engine.AI.Behavior")
 
 local MainScene = Scene:extend()
 
@@ -141,6 +142,8 @@ function MainScene:enter()
     self.log:add("Press [F4] to load Data JSON (sample_*).")
     self.log:add("Press [F6] to switch to ChainTestScene.")
     self.log:add("Press [F7] to test Color utility class.")
+    self.log:add("Press [F8] to test Behavior Tree.")
+    self.log:add("Press [F9] to test Effect Tree.")
 end
 
 function MainScene:update(dt)
@@ -232,6 +235,28 @@ function MainScene:keypressed(key)
         end
         return
     end
+    if key == "f8" then
+        if self.app and self.app.logger then self.app.logger:info("Run behavior tree demo") end
+        self:runBehaviorDemo()
+        return
+    end
+    if key == "f9" then
+        if self.app and self.app.logger then self.app.logger:info("Switch to effect-test scene") end
+        if self.app and self.app.scenes then
+            if not self._effectTestRegistered then
+                local ok, SceneMod = pcall(require, "Game.Scenes.EffectTestScene")
+                if ok and SceneMod then
+                    self.app.scenes:register("effect-test", SceneMod(self.app))
+                    self._effectTestRegistered = true
+                else
+                    if self.app and self.app.logger then self.app.logger:error("EffectTestScene require failed") end
+                    return
+                end
+            end
+            self.app:switchScene("effect-test")
+        end
+        return
+    end
     if key == "f3" then
         if self.app and self.app.logger then self.app.logger:info("Run storage tests") end
         self:runStorageTests()
@@ -299,6 +324,56 @@ function MainScene:runDataJsonTests()
         self.log:add("[data][config] FAIL: " .. tostring(cerr))
         if self.app and self.app.logger then self.app.logger:errorf("[data][config] %s", tostring(cerr)) end
     end
+end
+
+function MainScene:runBehaviorDemo()
+    local Status = Behavior.Status
+
+    -- 等待动作：运行给定秒数后成功
+    local WaitAction = Behavior.Node:extend()
+    function WaitAction:init(opts)
+        Behavior.Node.init(self, opts)
+        self.duration = (opts and opts.duration) or 1.0
+        self.elapsed = 0
+    end
+    function WaitAction:start(bb)
+        self.elapsed = 0
+    end
+    function WaitAction:update(dt, bb)
+        self.elapsed = self.elapsed + (dt or 0)
+        if self.elapsed >= self.duration then
+            return Status.Success
+        else
+            return Status.Running
+        end
+    end
+
+    -- 立即成功动作
+    local InstantSuccess = Behavior.Node:extend()
+    function InstantSuccess:update(dt, bb)
+        return Status.Success
+    end
+
+    -- 行为树：Sequence(Wait 1.0s, InstantSuccess)
+    local seq = Behavior.Sequence({
+        children = {
+            WaitAction({ name = "wait1s", duration = 1.0 }),
+            InstantSuccess({ name = "done" })
+        }
+    })
+    local tree = Behavior.Tree(seq, { demo = true })
+
+    self.log:add("[bt] demo start: Sequence(wait, instant)")
+    local step = 0.2
+    local id
+    id = self.app.timer:every(step, function()
+        local s = tree:tick(step)
+        self.log:add(string.format("[bt] tick -> %s", tostring(s)))
+        if s ~= Status.Running then
+            self.log:add(string.format("[bt] demo end: %s", tostring(s)))
+            self.app.timer:cancel(id)
+        end
+    end)
 end
 
 function MainScene:leave()

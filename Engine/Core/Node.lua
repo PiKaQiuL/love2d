@@ -49,7 +49,7 @@ end
 
 ---添加子节点
 ---@generic T : Node
----
+---@param self T
 ---@param child Node
 ---@return T
 function Node:add(child)
@@ -79,7 +79,7 @@ end
 
 ---移除子节点
 ---@generic T : Node
----
+---@param self T
 ---@param child Node
 ---@return T
 function Node:remove(child)
